@@ -40,7 +40,7 @@ type TodayData = {
 export default function HomeScreen() {
   const [todayData, setTodayData] = useState<TodayData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const apiKey = "b9e24e87ee0051d4a02686595d4f5fe3"; // OpenWeatherMap API key
+  const apiKey = "3920538957e8362160f4d41ff5cae837"; // OpenWeatherMap API key
 
   const loadTodayData = async () => {
     try {
@@ -49,14 +49,21 @@ export default function HomeScreen() {
       // Fetch user's location
       const location = await loadData("userLocation");
       if (!location) {
-        Alert.alert("Error", "Location not set. Update your location in Settings.");
+        Alert.alert(
+          "Error",
+          "Location not set. Update your location in Settings."
+        );
         return;
       }
 
       const { latitude, longitude } = location;
 
       // Fetch and combine weather and daylight data
-      const weatherAndDaylightData = await fetchWeatherAndDaylight(latitude, longitude, apiKey);
+      const weatherAndDaylightData = await fetchWeatherAndDaylight(
+        latitude,
+        longitude,
+        apiKey
+      );
       await saveData("weatherAndDaylight", weatherAndDaylightData);
 
       const schedules = await loadData("schedules");
@@ -67,8 +74,8 @@ export default function HomeScreen() {
         return;
       }
 
-      const todayWeather = weatherAndDaylightData.find(
-        (entry: any) => entry.dt_txt.startsWith(today)
+      const todayWeather = weatherAndDaylightData.find((entry: any) =>
+        entry.dt_txt.startsWith(today)
       );
 
       setTodayData({
@@ -131,7 +138,8 @@ export default function HomeScreen() {
       <View style={styles.card}>
         <Text style={styles.dateText}>Today: {todayData.date}</Text>
         <Text style={styles.weatherText}>
-          Weather: {todayData.weather?.main || "N/A"}, {todayData.weather?.description || "N/A"} Temp:{" "}
+          Weather: {todayData.weather?.main || "N/A"},{" "}
+          {todayData.weather?.description || "N/A"} Temp:{" "}
           {todayData.weather?.temperature || "N/A"}°C
         </Text>
         <Text style={styles.daylightText}>
@@ -198,11 +206,40 @@ const styles = StyleSheet.create({
   scheduleHeader: { fontSize: 18, fontWeight: "600", marginBottom: 8 },
   scheduleText: { fontSize: 14, marginBottom: 4, marginLeft: 8 },
   noSchedulesText: { fontSize: 14, fontStyle: "italic", color: "gray" },
-  questionText: { fontSize: 16, fontWeight: "bold", marginBottom: 16, textAlign: "center" },
-  buttonContainer: { flexDirection: "row", justifyContent: "space-around", marginTop: 16 },
-  keepButton: { backgroundColor: "#28a745", paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8 },
-  editButton: { backgroundColor: "#007bff", paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8 },
-  dontSaveButton: { backgroundColor: "#dc3545", paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8 },
-  buttonText: { color: "#ffffff", fontSize: 16, fontWeight: "bold", textAlign: "center" },
+  questionText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 16,
+  },
+  keepButton: {
+    backgroundColor: "#28a745",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  editButton: {
+    backgroundColor: "#007bff",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  dontSaveButton: {
+    backgroundColor: "#dc3545",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  buttonText: {
+    color: "#ffffff",
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
   error: { textAlign: "center", color: "red", fontSize: 16 },
 });

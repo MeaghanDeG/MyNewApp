@@ -1,24 +1,18 @@
-export type WeatherData = {
-  dt_txt: string; // ISO date string
-  weather: {
-    main: string; // Main weather description
-    description: string; // Detailed weather description
-    temperature: number; // Temperature in Celsius
-  };
-  daylight: {
-    sunrise: string; // Sunrise time in HH:MM format
-    sunset: string; // Sunset time in HH:MM format
-  };
-};
+import { OPENWEATHERMAP_API_KEY } from "@env";
 
 export const fetchWeatherAndDaylight = async (
   latitude: number,
-  longitude: number,
-  apiKey: string
+  longitude: number
 ): Promise<WeatherData[]> => {
   try {
-    // Fetch One Call API for daily data
-    const oneCallUrl = `https://api.openweathermap.org/data/2.5/onecall?lat=${latitude}&lon=${longitude}&exclude=minutely,hourly,alerts&units=metric&appid=${apiKey}`;
+    if (!OPENWEATHERMAP_API_KEY) {
+      throw new Error("Missing OpenWeatherMap API key in configuration.");
+    }
+
+    const oneCallUrl = `https://api.openweathermap.org/data/2.5/onecall?lat=${latitude}&lon=${longitude}&exclude=minutely,hourly,alerts&units=metric&appid=${OPENWEATHERMAP_API_KEY}`;
+    const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${OPENWEATHERMAP_API_KEY}&units=metric`;
+
+    // Fetch One Call API for daily data (sunrise and sunset)
     const oneCallResponse = await fetch(oneCallUrl);
     if (!oneCallResponse.ok) {
       throw new Error(`Failed to fetch daylight data: ${oneCallResponse.statusText}`);
@@ -26,34 +20,35 @@ export const fetchWeatherAndDaylight = async (
     const oneCallData = await oneCallResponse.json();
     const { daily, timezone_offset } = oneCallData;
 
-    // Fetch 5-day Forecast API for hourly data
-    const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`;
+    // Fetch 5-day Forecast API for hourly weather
     const forecastResponse = await fetch(forecastUrl);
     if (!forecastResponse.ok) {
       throw new Error(`Failed to fetch weather data: ${forecastResponse.statusText}`);
     }
     const forecastData = await forecastResponse.json();
 
-    // Adjust times for the local timezone
+    // Adjust times to local timezone
     const adjustToTimezone = (timestamp: number): string =>
       new Date((timestamp + timezone_offset) * 1000).toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
       });
 
-    // Combine forecast (hourly) with daily (sunrise/sunset)
+    // Combine hourly weather data with daily daylight data
     return forecastData.list.map((item: any, index: number) => {
-      const day = daily[Math.floor(index / 8)]; // Group hourly data into daily
+      const dayIndex = Math.floor(index / 8); // Divide 8-hour segments into days
+      const day = daily[dayIndex] || {};
+
       return {
-        dt_txt: item.dt_txt,
+        dt_txt: item.dt_txt, // Date/Time string for hourly data
         weather: {
-          main: item.weather[0].main,
-          description: item.weather[0].description,
-          temperature: item.main.temp,
+          main: item.weather[0]?.main || "Unknown",
+          description: item.weather[0]?.description || "No description available",
+          temperature: item.main?.temp || 0,
         },
         daylight: {
-          sunrise: adjustToTimezone(day.sunrise),
-          sunset: adjustToTimezone(day.sunset),
+          sunrise: day.sunrise ? adjustToTimezone(day.sunrise) : "N/A",
+          sunset: day.sunset ? adjustToTimezone(day.sunset) : "N/A",
         },
       };
     });

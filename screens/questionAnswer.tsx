@@ -12,21 +12,11 @@ export default function QuestionAnswer() {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalContent, setModalContent] = useState<string>("");
 
-  const handleUsedLampResponse = (response: string) => {
-    setModalContent(
-      response === "yes"
-        ? "Great! Here's some information to refer to, and some FAQs you might find interesting."
-        : "No worries! This is a guide to help you through common questions and some information you might find interesting."
-    );
-    setModalVisible(true);
-  };
-
-  const handlePreferredTimeResponse = (response: string) => {
-    setModalContent(
-      response === "Morning"
-        ? "Great! That's the ideal time to use one!"
-        : "Morning is thought to be the best time, but if your schedule can't accommodate that, better than never for sure!"
-    );
+  const handleResponse = (response: string, question: string) => {
+    const content = response === "yes"
+      ? `You answered "Yes" to: ${question}`
+      : `You answered "No" to: ${question}`;
+    setModalContent(content);
     setModalVisible(true);
   };
 
@@ -53,42 +43,184 @@ export default function QuestionAnswer() {
         </View>
       </Modal>
 
-      {/* Card 1: Question about SAD Lamp */}
+      {/* Questions */}
       <View style={styles.card}>
         <Text style={styles.heading}>Have you used a SAD lamp in the past?</Text>
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={[styles.button, styles.yesButton]}
-            onPress={() => handleUsedLampResponse("yes")}
+            onPress={() =>
+              handleResponse(
+                "yes",
+                "Have you used a SAD lamp in the past?"
+              )
+            }
           >
             <Text style={styles.buttonText}>Yes</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.button, styles.noButton]}
-            onPress={() => handleUsedLampResponse("no")}
+            onPress={() =>
+              handleResponse(
+                "no",
+                "Have you used a SAD lamp in the past?"
+              )
+            }
           >
             <Text style={styles.buttonText}>No</Text>
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Card 2: Question about Preferred Time */}
       <View style={styles.card}>
         <Text style={styles.heading}>
-          What time of day do you think you'll use your SAD lamp?
+          When do you usually prefer to use a SAD lamp, if ever?
         </Text>
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={[styles.button, styles.morningButton]}
-            onPress={() => handlePreferredTimeResponse("Morning")}
+            onPress={() =>
+              handleResponse(
+                "Morning",
+                "When do you usually prefer to use a SAD lamp, if ever?"
+              )
+            }
           >
             <Text style={styles.buttonText}>Morning</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.button, styles.otherButton]}
-            onPress={() => handlePreferredTimeResponse("Other")}
+            onPress={() =>
+              handleResponse(
+                "Other",
+                "When do you usually prefer to use a SAD lamp, if ever?"
+              )
+            }
           >
             <Text style={styles.buttonText}>Other</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.heading}>
+          Are you having any problems with your eyesight? Are you finding your
+          eyes sensitive to sunlight?
+        </Text>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={[styles.button, styles.yesButton]}
+            onPress={() =>
+              handleResponse(
+                "yes",
+                "Are you having any problems with your eyesight? Are you finding your eyes sensitive to sunlight?"
+              )
+            }
+          >
+            <Text style={styles.buttonText}>Yes</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, styles.noButton]}
+            onPress={() =>
+              handleResponse(
+                "no",
+                "Are you having any problems with your eyesight? Are you finding your eyes sensitive to sunlight?"
+              )
+            }
+          >
+            <Text style={styles.buttonText}>No</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.heading}>
+          Have you ever been diagnosed as bipolar or as having manic episodes?
+        </Text>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={[styles.button, styles.yesButton]}
+            onPress={() =>
+              handleResponse(
+                "yes",
+                "Have you ever been diagnosed as bipolar or as having manic episodes?"
+              )
+            }
+          >
+            <Text style={styles.buttonText}>Yes</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, styles.noButton]}
+            onPress={() =>
+              handleResponse(
+                "no",
+                "Have you ever been diagnosed as bipolar or as having manic episodes?"
+              )
+            }
+          >
+            <Text style={styles.buttonText}>No</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.heading}>
+          Are you under the care of a physician or recently discharged from the
+          hospital?
+        </Text>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={[styles.button, styles.yesButton]}
+            onPress={() =>
+              handleResponse(
+                "yes",
+                "Are you under the care of a physician or recently discharged from the hospital?"
+              )
+            }
+          >
+            <Text style={styles.buttonText}>Yes</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, styles.noButton]}
+            onPress={() =>
+              handleResponse(
+                "no",
+                "Are you under the care of a physician or recently discharged from the hospital?"
+              )
+            }
+          >
+            <Text style={styles.buttonText}>No</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.heading}>
+          Are you taking any medication that makes you sensitive to sunlight or
+          contraindicated for sunlight exposure?
+        </Text>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={[styles.button, styles.yesButton]}
+            onPress={() =>
+              handleResponse(
+                "yes",
+                "Are you taking any medication that makes you sensitive to sunlight or contraindicated for sunlight exposure?"
+              )
+            }
+          >
+            <Text style={styles.buttonText}>Yes</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, styles.noButton]}
+            onPress={() =>
+              handleResponse(
+                "no",
+                "Are you taking any medication that makes you sensitive to sunlight or contraindicated for sunlight exposure?"
+              )
+            }
+          >
+            <Text style={styles.buttonText}>No</Text>
           </TouchableOpacity>
         </View>
       </View>

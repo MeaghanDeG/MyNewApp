@@ -19,28 +19,27 @@ type ScheduleItem = {
   endTime: string;
 };
 
+type DaylightData = {
+  sunrise: string | null;
+  sunset: string | null;
+};
+
 type WeatherData = {
-  dt: number; // Timestamp
+  dt_txt: string; // ISO date string
   weather: {
-    main: string; // Main weather condition, e.g., "Clear"
-    description: string; // Detailed description
+    main: string;
+    description: string;
+    temperature: number;
   };
-  temp: number; // Temperature in °C
-  daylight: {
-    sunrise: string | null; // Sunrise time
-    sunset: string | null; // Sunset time
-  };
+  daylight: DaylightData;
 };
 
 type CombinedData = {
   date: string;
   schedules: ScheduleItem[];
-  daylight: {
-    sunrise: string | null;
-    sunset: string | null;
-  };
+  daylight: DaylightData;
   weather: string;
-  temp: number;
+  temp: string; // Displayed as °C
 };
 
 export default function FiveDayScreen() {
@@ -52,34 +51,36 @@ export default function FiveDayScreen() {
     try {
       setLoading(true);
 
+      // Get location
       const location = await getCurrentLocation();
       const apiKey = Constants.expoConfig?.extra?.OPENWEATHERMAP_API_KEY;
       if (!apiKey) {
         throw new Error("Missing OpenWeatherMap API key in configuration.");
       }
 
-      const weatherDaylightData = await fetchWeatherAndDaylight(
+      // Fetch weather and daylight data
+      const weatherData: WeatherData[] = await fetchWeatherAndDaylight(
         location.latitude,
         location.longitude,
         apiKey
       );
 
-      const combined = weatherDaylightData.map((day: WeatherData) => {
-        const timestamp = day.dt ? day.dt * 1000 : Date.now();
-
-        return {
-          date: new Date(timestamp).toLocaleDateString(undefined, {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          }),
-          schedules: [], // Replace with schedule fetching logic
-          daylight: day.daylight || { sunrise: null, sunset: null },
-          weather: day.weather.main || "Unknown",
-          temp: day.temp || "N/A",
-        };
-      });
+      // Combine the data for display
+      const combined = weatherData.map((day) => ({
+        date: new Date(day.dt_txt).toLocaleDateString(undefined, {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
+        schedules: [], // Replace with actual schedules
+        daylight: {
+          sunrise: day.daylight.sunrise || "N/A",
+          sunset: day.daylight.sunset || "N/A",
+        },
+        weather: day.weather.main,
+        temp: `${Math.round(day.weather.temperature)}°C`,
+      }));
 
       setCombinedData(combined);
     } catch (error) {
@@ -98,8 +99,8 @@ export default function FiveDayScreen() {
     fetchCombinedData();
   }, []);
 
-  const renderCard = useCallback(({ item }: { item: CombinedData }) => {
-    return (
+  const renderCard = useCallback(
+    ({ item }: { item: CombinedData }) => (
       <View style={styles.card}>
         <Text style={styles.dateText}>{item.date}</Text>
 
@@ -107,7 +108,7 @@ export default function FiveDayScreen() {
         <View style={styles.row}>
           <Ionicons name="cloud-outline" size={20} color="#555" />
           <Text style={styles.weatherText}>
-            {item.weather}, {item.temp}°C
+            {item.weather}, {item.temp}
           </Text>
         </View>
 
@@ -115,8 +116,7 @@ export default function FiveDayScreen() {
         <View style={styles.row}>
           <Ionicons name="sunny-outline" size={20} color="#555" />
           <Text style={styles.daylightText}>
-            Sunrise: {item.daylight.sunrise || "N/A"}, Sunset:{" "}
-            {item.daylight.sunset || "N/A"}
+            Sunrise: {item.daylight.sunrise}, Sunset: {item.daylight.sunset}
           </Text>
         </View>
 
@@ -126,8 +126,7 @@ export default function FiveDayScreen() {
           item.schedules.map((schedule, index) => (
             <TouchableOpacity key={index} style={styles.scheduleItem}>
               <Text>
-                {schedule.startTime} - {schedule.endTime}:{" "}
-                {schedule.description}
+                {schedule.startTime} - {schedule.endTime}: {schedule.description}
               </Text>
             </TouchableOpacity>
           ))
@@ -135,8 +134,9 @@ export default function FiveDayScreen() {
           <Text style={styles.noSchedulesText}>No schedules for this day.</Text>
         )}
       </View>
-    );
-  }, []);
+    ),
+    []
+  );
 
   const keyExtractor = useCallback((item: CombinedData) => item.date, []);
 

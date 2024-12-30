@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { fetchWeatherAndDaylight } from "../../util/fetchWeatherAndDaylight";
 import { saveData, loadData } from "../../util/storage";
+import { OPEN_WEATHER_API_KEY } from "@env";
 
 // Define types for the data structures
 type ScheduleItem = {
@@ -40,7 +41,7 @@ type TodayData = {
 export default function HomeScreen() {
   const [todayData, setTodayData] = useState<TodayData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const apiKey = "3920538957e8362160f4d41ff5cae837"; // OpenWeatherMap API key
+  
 
   const loadTodayData = async () => {
     try {
@@ -62,7 +63,7 @@ export default function HomeScreen() {
       const weatherAndDaylightData = await fetchWeatherAndDaylight(
         latitude,
         longitude,
-        apiKey
+        
       );
       await saveData("weatherAndDaylight", weatherAndDaylightData);
 

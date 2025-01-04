@@ -5,39 +5,34 @@ export default {
     entryPoint: "./node_modules/expo-router/entry.js",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/images/app-icon.png",
     scheme: "myapp",
     userInterfaceStyle: "automatic",
-    newArchEnabled: true,
-    splash: {
-      image: "./assets/images/splash-icon.png",
-      resizeMode: "contain",
-      backgroundColor: "#ffffff",
-    },
+    newArchEnabled: true, // ✅ Removed the misplaced closing bracket
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "com.meaghandeg.MyNewApp",
+      bundleIdentifier: "com.meaghandeg.MyNewApp"
     },
     android: {
       adaptiveIcon: {
         foregroundImage: "./assets/images/adaptive-icon.png",
-        backgroundColor: "#ffffff",
-      },
+        backgroundColor: "#ffffff"
+      }
     },
     web: {
       bundler: "metro",
       output: "static",
-      favicon: "./assets/images/favicon.png",
+      favicon: "./assets/images/favicon.png"
     },
     plugins: ["expo-router", "expo-font", "expo-asset"],
     extra: {
       OPENWEATHERMAP_API_KEY: process.env.OPENWEATHERMAP_API_KEY,
       eas: {
-        projectId: "4e0779ac-183b-4dc2-897e-2c53142cd35d",
-      },
+        projectId: "4e0779ac-183b-4dc2-897e-2c53142cd35d"
+      }
     },
     experiments: {
-      typedRoutes: true,
-    },
-  },
+      
+      typedRoutes: true
+    }
+  }
 };

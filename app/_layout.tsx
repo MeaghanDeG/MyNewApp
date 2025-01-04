@@ -8,6 +8,7 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import "react-native-reanimated";
 
+
 import { useColorScheme } from "@/components/useColorScheme";
 import { CustomDarkTheme, CustomLightTheme } from "@/theme";
 

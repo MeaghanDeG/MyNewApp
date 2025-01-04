@@ -1,27 +1,10 @@
 {
+  "compilerOptions": {},
   "extends": "expo/tsconfig.base",
-  "compilerOptions": {
-    "strict": true,
-    "paths": {
-      "@/*": ["./*"]  // Simplifies imports with `@/` as an alias for the root folder
-    },
-    "baseUrl": ".",    // Sets the base URL for module resolution
-    "target": "esnext", // Ensures modern JS features are targeted
-    "module": "esnext", // Matches with ESM modules used in Expo
-    "jsx": "react",     // Enables JSX syntax for React
-    "skipLibCheck": true, // Avoids unnecessary type checks for libraries
-    "esModuleInterop": true, // Ensures compatibility with CommonJS modules
-    "resolveJsonModule": true // Allows importing `.json` files
-  },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-  ],
-  "exclude": [
-    "node_modules",  // Avoid type checking in `node_modules`
-    "android",       // Exclude native Android folder if prebuilt
-    "ios"            // Exclude native iOS folder if prebuilt
   ]
 }

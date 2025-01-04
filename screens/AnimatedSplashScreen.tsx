@@ -1,8 +1,9 @@
 import React, { useEffect, useRef } from "react";
 import { View, StyleSheet, Animated, Image } from "react-native";
+import splashAnimated from "../assets/images/splash-animated.gif"; // ✅ Updated path and name
 
 export default function AnimatedSplashScreen({ onFinish }: { onFinish: () => void }) {
-  const fadeAnim = useRef(new Animated.Value(0)).current; // ✅ Correct useRef for persistence
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     const animation = Animated.timing(fadeAnim, {
@@ -11,24 +12,16 @@ export default function AnimatedSplashScreen({ onFinish }: { onFinish: () => voi
       useNativeDriver: true,
     });
 
-    // Start animation and run onFinish after delay
     animation.start(() => {
-      const timeoutId = setTimeout(() => {
-        onFinish();
-      }, 1000); // ✅ Delayed completion by 1 second
-
-      // Cleanup timeout when component unmounts
+      const timeoutId = setTimeout(onFinish, 1000);
       return () => clearTimeout(timeoutId);
     });
-  }, [fadeAnim, onFinish]); // ✅ Cleaned up dependency array
+  }, [fadeAnim, onFinish]);
 
   return (
     <View style={styles.container}>
       <Animated.View style={{ opacity: fadeAnim }}>
-        <Image
-          source={require("../assets/images/splash-icon.gif")} 
-          style={styles.logo}
-        />
+        <Image source={splashAnimated} style={styles.logo} />
       </Animated.View>
     </View>
   );
@@ -36,13 +29,13 @@ export default function AnimatedSplashScreen({ onFinish }: { onFinish: () => voi
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: "center",
-    backgroundColor: "#FFF8E1",
     flex: 1,
     justifyContent: "center", 
+    alignItems: "center",
+    backgroundColor: "#FFF8E1",
   },
   logo: {
-    height: 200,
     width: 200,
+    height: 200,
   },
 });

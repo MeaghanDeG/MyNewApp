@@ -1,39 +1,98 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+# GitHub Docs Reference
+# Learn more: https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
-# dependencies
+# =====================
+# ✅ Node.js Dependencies
+# =====================
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+.pnpm-debug.log*
+*.log
 
-# Environment variables
-.env
-
-# Expo
+# =====================
+# ✅ Expo Specific Folders
+# =====================
 .expo/
 dist/
 web-build/
-expo-env.d.ts
+.expo-shared/
+.expo-env.d.ts
+.expo-go/
+.expo-dev-client/
 
-# Native
+# =====================
+# ✅ Metro Bundler
+# =====================
+.metro-health-check*
+.cache/
+.babelrc
+
+# =====================
+# ✅ Environment Variables
+# =====================
+.env
+.env*.local
+
+# =====================
+# ✅ Native Project Files (iOS and Android)
+# =====================
+android/
+ios/
 *.orig.*
 *.jks
 *.p8
 *.p12
 *.key
 *.mobileprovision
+*.xcworkspace
+Pods/
+Podfile.lock
+*.xcodeproj
+xcuserdata/
+DerivedData/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
 
-# Metro
-.metro-health-check*
-
-# debug
-npm-debug.*
-yarn-debug.*
-yarn-error.*
-
-# macOS
+# =====================
+# ✅ macOS Specific
+# =====================
 .DS_Store
 *.pem
+*.swp
 
-# local env files
-.env*.local
-
-# typescript
+# =====================
+# ✅ TypeScript Specific
+# =====================
 *.tsbuildinfo
+*.d.ts.map
+
+# =====================
+# ✅ Debugging Files
+# =====================
+.codegpt
+.vscode/
+.idea/
+*.log
+*.lock
+
+# =====================
+# ✅ Temporary Files
+# =====================
+tmp/
+temp/
+.cache/
+*.bak
+*.backup
+*.tmp
+
+# =====================
+# ✅ Testing and Coverage
+# =====================
+coverage/
+*.lcov
+jest-test-results.json

@@ -143,28 +143,28 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: "#FFF8E1" },
-  container: { flex: 1, padding: 16 },
-  sectionTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 8 },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 12,
-  },
   button: {
-    backgroundColor: "#007BFF",
-    padding: 12,
-    borderRadius: 8,
     alignItems: "center",
+    backgroundColor: "#007BFF",
+    borderRadius: 8,
     marginBottom: 16,
+    padding: 12,
   },
   buttonText: { color: "#fff", fontWeight: "bold" },
+  container: { flex: 1, padding: 16 },
+  input: {
+    borderColor: "#ddd",
+    borderRadius: 8,
+    borderWidth: 1,
+    marginBottom: 12,
+    padding: 12,
+  },
+  safeArea: { backgroundColor: "#FFF8E1", flex: 1 },
+  sectionTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 8 },
   switchContainer: {
+    alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
     marginVertical: 16,
   },
   switchText: { fontSize: 16 },

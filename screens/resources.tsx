@@ -29,21 +29,21 @@ export default function Resources() {
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: "#f9f9f9",
     flexGrow: 1,
-    padding: 20,
-    backgroundColor: "#f9f9f9", // Light background color
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-    textAlign: "center",
-    color: "#333",
+    padding: 20, // Light background color
   },
   link: {
     fontSize: 16,
     color: "#1E90FF", // Blue link color
     textDecorationLine: "underline",
     marginBottom: 15,
+  },
+  title: {
+    color: "#333",
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
   },
 });

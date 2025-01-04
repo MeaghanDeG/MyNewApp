@@ -1,0 +1,6 @@
+{
+    "ignore_dirs": [
+      "Library/Containers/developer.apple.wwdc-Release"
+    ]
+  }
+  

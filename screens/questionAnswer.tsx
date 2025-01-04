@@ -229,31 +229,10 @@ export default function QuestionAnswer() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#FFF8E1",
-    padding: 20,
-  },
-  card: {
-    backgroundColor: "#fff",
-    padding: 25,
-    borderRadius: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    marginBottom: 20,
-    width: Dimensions.get("window").width * 0.9,
-    alignItems: "center",
-  },
-  heading: {
-    fontSize: 18,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 15,
-    color: "#333",
+  button: {
+    borderRadius: 5,
+    paddingHorizontal: 30,
+    paddingVertical: 12,
   },
   buttonContainer: {
     flexDirection: "row",
@@ -261,60 +240,81 @@ const styles = StyleSheet.create({
     marginTop: 10,
     width: "100%",
   },
-  button: {
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 5,
-  },
-  yesButton: {
-    backgroundColor: "#1E9088",
-  },
-  noButton: {
-    backgroundColor: "#1E9088",
-  },
-  morningButton: {
-    backgroundColor: "#1E9088",
-  },
-  otherButton: {
-    backgroundColor: "#1E9088",
-  },
   buttonText: {
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
   },
-  modalOverlay: {
+  card: {
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    marginBottom: 20,
+    padding: 25,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    width: Dimensions.get("window").width * 0.9,
+  },
+  closeButton: {
+    backgroundColor: "#007BFF",
+    borderRadius: 5,
+    paddingHorizontal: 25,
+    paddingVertical: 10,
+  },
+  closeButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  container: {
+    alignItems: "center",
+    backgroundColor: "#FFF8E1",
     flex: 1,
     justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
+    padding: 20,
+  },
+  heading: {
+    color: "#333",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 15,
+    textAlign: "center",
   },
   modalCard: {
+    alignItems: "center",
     backgroundColor: "white",
-    padding: 20,
     borderRadius: 12,
+    padding: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 6,
     width: Dimensions.get("window").width * 0.8,
+  },
+  modalOverlay: {
     alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+    flex: 1,
+    justifyContent: "center",
   },
   modalText: {
+    color: "#444",
     fontSize: 18,
     marginBottom: 15,
     textAlign: "center",
-    color: "#444",
   },
-  closeButton: {
-    backgroundColor: "#007BFF",
-    paddingVertical: 10,
-    paddingHorizontal: 25,
-    borderRadius: 5,
+  morningButton: {
+    backgroundColor: "#1E9088",
   },
-  closeButtonText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 16,
+  noButton: {
+    backgroundColor: "#1E9088",
+  },
+  otherButton: {
+    backgroundColor: "#1E9088",
+  },
+  yesButton: {
+    backgroundColor: "#1E9088",
   },
 });

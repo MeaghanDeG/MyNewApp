@@ -61,14 +61,14 @@ export default function RootLayout() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#FFF8E1",
-  },
   loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#FFF8E1",
+    flex: 1,
+    justifyContent: "center",
+  },
+  safeArea: {
+    backgroundColor: "#FFF8E1",
+    flex: 1,
   },
 });

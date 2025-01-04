@@ -52,25 +52,25 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  subheading: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
+  footer: {
+    fontSize: 14,
+    fontStyle: 'italic',
+    marginTop: 20,
+    textAlign: 'center',
   },
   paragraph: {
     fontSize: 16,
     lineHeight: 24,
     marginBottom: 15,
   },
-  footer: {
-    fontSize: 14,
-    fontStyle: 'italic',
-    marginTop: 20,
-    textAlign: 'center',
+  subheading: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
   },
 });

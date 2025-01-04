@@ -123,20 +123,38 @@ export default function InfoTabScreen() {
 }
 
 const styles = StyleSheet.create({
+  activeTab: {
+    backgroundColor: "#007BFF",
+  },
+  activeTabText: {
+    color: "#fff",
+  },
   container: {
     flex: 1,
   },
   header: {
-    backgroundColor: "#007BFF",
-    paddingVertical: 20,
-    paddingHorizontal: 15,
-    justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#007BFF",
+    justifyContent: "center",
+    paddingHorizontal: 15,
+    paddingVertical: 20,
   },
+  
   headerText: {
     color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
+  },
+  scrollContent: {
+    paddingBottom: 20,
+  },
+  section: {
+    minHeight: Dimensions.get("window").height - 200,
+    padding: 20, // Adjust for header + tabs height
+  },
+  sectionBuffer: {
+    marginTop: 20, // Adds a buffer at the top of each section
+    backgroundColor: "#f9f9f9", // Adds light background to match screens
   },
   stickyTabs: {
     position: "absolute",
@@ -151,32 +169,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: "#ddd",
   },
-  
   tab: {
+    borderRadius: 5,
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 5,
-  },
-  activeTab: {
-    backgroundColor: "#007BFF",
   },
   tabText: {
+    color: "#007BFF",
     fontSize: 16,
     fontWeight: "bold",
-    color: "#007BFF",
-  },
-  activeTabText: {
-    color: "#fff",
-  },
-  scrollContent: {
-    paddingBottom: 20,
-  },
-  section: {
-    padding: 20,
-    minHeight: Dimensions.get("window").height - 200, // Adjust for header + tabs height
-  },
-  sectionBuffer: {
-    marginTop: 20, // Adds a buffer at the top of each section
-    backgroundColor: "#f9f9f9", // Adds light background to match screens
   },
 });

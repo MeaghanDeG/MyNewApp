@@ -246,15 +246,15 @@ export default function ScheduleScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: "#FFF8E1" },
-  scheduleContainer: { padding: 16 },
-  card: { marginBottom: 8, padding: 8, backgroundColor: "#f0f0f0" },
-  noSchedulesText: { textAlign: "center", color: "#888" },
-  modalContent: { padding: 16, backgroundColor: "white", borderRadius: 8 },
-  modalTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 16 },
-  input: { marginBottom: 12, borderBottomWidth: 1, padding: 8 },
-  daylightBox: { backgroundColor: "#E3F2FD", padding: 16, borderRadius: 8, margin: 16 },
-  daylightTitle: { fontSize: 18, fontWeight: "bold" },
+  card: { backgroundColor: "#f0f0f0", marginBottom: 8, padding: 8 },
+  daylightBox: { backgroundColor: "#E3F2FD", borderRadius: 8, margin: 16, padding: 16 },
   daylightText: { fontSize: 16 },
+  daylightTitle: { fontSize: 18, fontWeight: "bold" },
+  input: { borderBottomWidth: 1, marginBottom: 12, padding: 8 },
+  modalContent: { backgroundColor: "white", borderRadius: 8, padding: 16 },
+  modalTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 16 },
+  noSchedulesText: { color: "#888", textAlign: "center" },
+  safeArea: { backgroundColor: "#FFF8E1", flex: 1 },
+  scheduleContainer: { padding: 16 },
 });
 

@@ -59,37 +59,37 @@ const FAQ = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-    backgroundColor: "#FFF8E1", // Soft yellow morning light color
+  answer: {
+    color: "#555",
+    fontSize: 16,
+    lineHeight: 22,
   },
-  title: {
-    fontSize: 22,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 16,
-    color: "#333",
+  container: {
+    backgroundColor: "#FFF8E1",
+    padding: 16, // Soft yellow morning light color
   },
   faqItem: {
     backgroundColor: "#FFFFFF",
-    padding: 16,
     borderRadius: 10,
     marginBottom: 16,
+    padding: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
   question: {
+    color: "#FFA726",
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 8,
-    color: "#FFA726", // Sunshine-inspired orange
+    marginBottom: 8, // Sunshine-inspired orange
   },
-  answer: {
-    fontSize: 16,
-    lineHeight: 22,
-    color: "#555",
+  title: {
+    color: "#333",
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 16,
+    textAlign: "center",
   },
 });
 

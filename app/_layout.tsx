@@ -1,3 +1,4 @@
+// app/_layout.tsx
 import React, { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { SafeAreaView, StyleSheet, ActivityIndicator } from "react-native";
@@ -8,39 +9,38 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import "react-native-reanimated";
 
+// Custom Hooks and Themes
+import { useColorScheme } from "../app/components/useColorScheme";
+import { CustomDarkTheme, CustomLightTheme } from "../app/theme";
 
-import { useColorScheme } from "@/components/useColorScheme";
-import { CustomDarkTheme, CustomLightTheme } from "@/theme";
-
-export { ErrorBoundary } from "expo-router";
-
-export const unstable_settings = {
-  initialRouteName: "(tabs)",
-};
-
+// ✅ Prevent splash screen from hiding before assets load
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
-  const [loaded, error] = useFonts({
+  // ✅ Load Fonts
+  const [fontsLoaded, fontError] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
     ...FontAwesome.font,
   });
 
+  // ✅ Log font errors
   useEffect(() => {
-    if (error) {
-      console.error("Font loading error:", error);
+    if (fontError) {
+      console.error("Font loading error:", fontError);
     }
-  }, [error]);
+  }, [fontError]);
 
+  // ✅ Hide splash screen after fonts load
   useEffect(() => {
-    if (loaded) {
+    if (fontsLoaded) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
+  }, [fontsLoaded]);
 
-  if (!loaded) {
+  // ✅ Show a loading indicator while fonts are loading
+  if (!fontsLoaded) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#1E9088" />
@@ -48,13 +48,18 @@ export default function RootLayout() {
     );
   }
 
+  // ✅ Main App Layout with Stack Navigator and Theming
   return (
     <SafeAreaProvider>
       <ThemeProvider
         value={colorScheme === "dark" ? CustomDarkTheme : CustomLightTheme}
       >
         <SafeAreaView style={styles.safeArea}>
-          <Stack />
+          <Stack
+            screenOptions={{
+              headerShown: true, // ✅ Combined from both versions
+            }}
+          />
         </SafeAreaView>
       </ThemeProvider>
     </SafeAreaProvider>
@@ -63,13 +68,13 @@ export default function RootLayout() {
 
 const styles = StyleSheet.create({
   loadingContainer: {
-    alignItems: "center",
-    backgroundColor: "#FFF8E1",
     flex: 1,
     justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#FFF8E1",
   },
   safeArea: {
-    backgroundColor: "#FFF8E1",
     flex: 1,
+    backgroundColor: "#FFF8E1",
   },
 });

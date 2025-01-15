@@ -1,41 +1,42 @@
-import React, { useEffect, useRef } from "react";
-import { View, StyleSheet, Animated, Image } from "react-native";
-import splashAnimated from "../assets/images/splash-animated.gif"; // ✅ Updated path and name
+// app/components/AnimatedSplashScreen.tsx
+import React, { useEffect } from "react";
+import { View, Image, StyleSheet } from "react-native";
 
-export default function AnimatedSplashScreen({ onFinish }: { onFinish: () => void }) {
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+// ✅ Ensure this path matches your project structure
+import splashImage from "@/assets/images/splash-animated.gif";
 
+type AnimatedSplashScreenProps = {
+  onFinish: () => void;
+};
+
+const AnimatedSplashScreen = ({ onFinish }: AnimatedSplashScreenProps) => {
   useEffect(() => {
-    const animation = Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 2000,
-      useNativeDriver: true,
-    });
-
-    animation.start(() => {
-      const timeoutId = setTimeout(onFinish, 1000);
-      return () => clearTimeout(timeoutId);
-    });
-  }, [fadeAnim, onFinish]);
+    const timer = setTimeout(() => {
+      onFinish(); // Hides splash screen after a delay
+    }, 3000); // ✅ Adjust delay as needed
+    return () => clearTimeout(timer); 
+  }, [onFinish]);
 
   return (
     <View style={styles.container}>
-      <Animated.View style={{ opacity: fadeAnim }}>
-        <Image source={splashAnimated} style={styles.logo} />
-      </Animated.View>
+      <Image source={splashImage} style={styles.image} />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center", 
+    justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#FFF8E1",
+    backgroundColor: "#000", 
   },
-  logo: {
-    width: 200,
-    height: 200,
+  image: {
+    width: 300,
+    height: 300,
+    resizeMode: "contain",
   },
 });
+
+export default AnimatedSplashScreen;
+

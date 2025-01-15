@@ -2,44 +2,49 @@
 import React, { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { SafeAreaView, StyleSheet, ActivityIndicator } from "react-native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { NavigationContainer } from "@react-navigation/native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { ThemeProvider } from "@react-navigation/native";
+import { useColorScheme } from "react-native";
+import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import "react-native-reanimated";
 
-// Custom Hooks and Themes
-import { useColorScheme } from "../app/components/useColorScheme";
-import { CustomDarkTheme, CustomLightTheme } from "../app/theme";
+// Import Screens (No Tabs Folder)
+import HomeScreen from "@/screens/HomeScreen";
+import FiveDayScreen from "@/screens/FiveDayScreen";
+import ScheduleScreen from "@/screens/ScheduleScreen";
+import SettingsScreen from "@/screens/SettingsScreen";
+import InfoTabScreen from "@/screens/InfoTabScreen";
 
-// ✅ Prevent splash screen from hiding before assets load
 SplashScreen.preventAutoHideAsync();
+
+// ✅ Initialize Bottom Tab Navigator
+const Tab = createBottomTabNavigator();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   // ✅ Load Fonts
   const [fontsLoaded, fontError] = useFonts({
-    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    SpaceMono: require("../app/assets/fonts/SpaceMono-Regular.ttf"),
     ...FontAwesome.font,
   });
 
-  // ✅ Log font errors
+  // ✅ Handle Font Loading
   useEffect(() => {
     if (fontError) {
       console.error("Font loading error:", fontError);
     }
   }, [fontError]);
 
-  // ✅ Hide splash screen after fonts load
   useEffect(() => {
     if (fontsLoaded) {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded]);
 
-  // ✅ Show a loading indicator while fonts are loading
+  // ✅ Show Loading Screen Until Fonts Load
   if (!fontsLoaded) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
@@ -48,24 +53,35 @@ export default function RootLayout() {
     );
   }
 
-  // ✅ Main App Layout with Stack Navigator and Theming
+  // ✅ Main App Layout Using Bottom Tabs
   return (
     <SafeAreaProvider>
-      <ThemeProvider
-        value={colorScheme === "dark" ? CustomDarkTheme : CustomLightTheme}
-      >
-        <SafeAreaView style={styles.safeArea}>
-          <Stack
-            screenOptions={{
-              headerShown: true, // ✅ Combined from both versions
-            }}
-          />
-        </SafeAreaView>
+           <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+        <Tab.Navigator
+          screenOptions={({ route }) => ({
+            tabBarIcon: ({ color, size }) => {
+              let iconName: string = "home";
+              if (route.name === "Home") iconName = "home";
+              else if (route.name === "Info") iconName = "info-circle";
+              else if (route.name === "Settings") iconName = "cog";
+              return <FontAwesome name={iconName} size={size} color={color} />;
+            },
+            tabBarActiveTintColor: "#007BFF",
+            tabBarInactiveTintColor: "gray",
+            headerShown: false,
+          })}
+        >
+          <Tab.Screen name="Home" component={HomeScreen} />
+          <Tab.Screen name="Info" component={InfoTabScreen} />
+          <Tab.Screen name="Settings" component={SettingsScreen} />
+        </Tab.Navigator>
       </ThemeProvider>
     </SafeAreaProvider>
   );
 }
 
+
+// ✅ Styles
 const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,

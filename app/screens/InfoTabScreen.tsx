@@ -1,11 +1,12 @@
-import React, { useRef, useState } from "react";
+// app/screens/InfoTabScreen.tsx
+import React, { useState } from "react";
 import {
-  ScrollView,
   View,
+  Text,
   TouchableOpacity,
   StyleSheet,
-  Dimensions,
-  Text,
+  LayoutAnimation,
+  ScrollView,
 } from "react-native";
 import FAQ from "@/screens/FAQ";
 import Info from "@/screens/info";
@@ -13,170 +14,91 @@ import Resources from "@/screens/resources";
 import QuestionAnswer from "@/screens/questionAnswer";
 
 export default function InfoTabScreen() {
-  const scrollViewRef = useRef<ScrollView>(null);
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
-  // Section refs
-  const questionRef = useRef<View>(null);
-  const faqRef = useRef<View>(null);
-  const infoRef = useRef<View>(null);
-  const resourcesRef = useRef<View>(null);
-
-  const [activeTab, setActiveTab] = useState("Question"); // Tracks which tab is active
-
-  // Scroll to specific section
-  const scrollToSection = (ref: React.RefObject<View>) => {
-    ref.current?.measure((x, y, width, height, pageX, pageY) => {
-      scrollViewRef.current?.scrollTo({ y: pageY - 150, animated: true }); // Adjust offset for header height
-    });
-  };
-
-  // Update active tab based on scroll position
-  const handleScroll = (event: any) => {
-    const offsetY = event.nativeEvent.contentOffset.y;
-    if (offsetY < 400) {
-      setActiveTab("Question");
-    } else if (offsetY >= 400 && offsetY < 800) {
-      setActiveTab("FAQ");
-    } else if (offsetY >= 800 && offsetY < 1200) {
-      setActiveTab("Info");
-    } else {
-      setActiveTab("Resources");
-    }
+  const toggleSection = (sectionName: string) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpandedSection(expandedSection === sectionName ? null : sectionName);
   };
 
   return (
-    <View style={styles.container}>
-      {/* Permanent Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerText}></Text>
-      </View>
-
-      {/* Sticky Tabs */}
-      <View style={styles.stickyTabs}>
-        <TouchableOpacity
-          onPress={() => scrollToSection(questionRef)}
-          style={[styles.tab, activeTab === "Question" && styles.activeTab]}
-        >
-          <Text
-            style={[styles.tabText, activeTab === "Question" && styles.activeTabText]}
-          >
-            Question
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => scrollToSection(faqRef)}
-          style={[styles.tab, activeTab === "FAQ" && styles.activeTab]}
-        >
-          <Text style={[styles.tabText, activeTab === "FAQ" && styles.activeTabText]}>
-            FAQ
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => scrollToSection(infoRef)}
-          style={[styles.tab, activeTab === "Info" && styles.activeTab]}
-        >
-          <Text style={[styles.tabText, activeTab === "Info" && styles.activeTabText]}>
-            Info
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => scrollToSection(resourcesRef)}
-          style={[styles.tab, activeTab === "Resources" && styles.activeTab]}
-        >
-          <Text
-            style={[styles.tabText, activeTab === "Resources" && styles.activeTabText]}
-          >
-            Resources
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Scrollable Content */}
-      <ScrollView
-        ref={scrollViewRef}
-        onScroll={handleScroll}
-        scrollEventThrottle={16}
-        contentContainerStyle={styles.scrollContent}
+    <ScrollView contentContainerStyle={styles.container}>
+      {/* ✅ Question Section */}
+      <TouchableOpacity
+        style={styles.accordionHeader}
+        onPress={() => toggleSection("Question")}
       >
-        {/* Question Section */}
-        <View ref={questionRef} style={[styles.section, styles.sectionBuffer]}>
+        <Text style={styles.headerText}>❓ Question & Answers</Text>
+      </TouchableOpacity>
+      {expandedSection === "Question" && (
+        <View style={styles.content}>
           <QuestionAnswer />
         </View>
+      )}
 
-        {/* FAQ Section */}
-        <View ref={faqRef} style={[styles.section, styles.sectionBuffer]}>
+      {/* ✅ FAQ Section */}
+      <TouchableOpacity
+        style={styles.accordionHeader}
+        onPress={() => toggleSection("FAQ")}
+      >
+        <Text style={styles.headerText}>📚 Frequently Asked Questions</Text>
+      </TouchableOpacity>
+      {expandedSection === "FAQ" && (
+        <View style={styles.content}>
           <FAQ />
         </View>
+      )}
 
-        {/* Info Section */}
-        <View ref={infoRef} style={[styles.section, styles.sectionBuffer]}>
+      {/* ✅ Info Section */}
+      <TouchableOpacity
+        style={styles.accordionHeader}
+        onPress={() => toggleSection("Info")}
+      >
+        <Text style={styles.headerText}>ℹ️ General Information</Text>
+      </TouchableOpacity>
+      {expandedSection === "Info" && (
+        <View style={styles.content}>
           <Info />
         </View>
+      )}
 
-        {/* Resources Section */}
-        <View ref={resourcesRef} style={[styles.section, styles.sectionBuffer]}>
+      {/* ✅ Resources Section */}
+      <TouchableOpacity
+        style={styles.accordionHeader}
+        onPress={() => toggleSection("Resources")}
+      >
+        <Text style={styles.headerText}>📖 Resources & References</Text>
+      </TouchableOpacity>
+      {expandedSection === "Resources" && (
+        <View style={styles.content}>
           <Resources />
         </View>
-      </ScrollView>
-    </View>
+      )}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  activeTab: {
-    backgroundColor: "#007BFF",
-  },
-  activeTabText: {
-    color: "#fff",
-  },
   container: {
-    flex: 1,
+    padding: 16,
+    flexGrow: 1,
+    backgroundColor: "#FFF8E1",
   },
-  header: {
-    alignItems: "center",
+  accordionHeader: {
+    padding: 16,
     backgroundColor: "#007BFF",
-    justifyContent: "center",
-    paddingHorizontal: 15,
-    paddingVertical: 20,
+    borderRadius: 10,
+    marginVertical: 8,
   },
-  
   headerText: {
-    color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
+    color: "#fff",
   },
-  scrollContent: {
-    paddingBottom: 20,
-  },
-  section: {
-    minHeight: Dimensions.get("window").height - 200,
-    padding: 20, // Adjust for header + tabs height
-  },
-  sectionBuffer: {
-    marginTop: 20, // Adds a buffer at the top of each section
-    backgroundColor: "#f9f9f9", // Adds light background to match screens
-  },
-  stickyTabs: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10, // Ensure it stays on top of content
-    backgroundColor: "#fff",
-    flexDirection: "row",
-    justifyContent: "space-around",
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderColor: "#ddd",
-  },
-  tab: {
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-  },
-  tabText: {
-    color: "#007BFF",
-    fontSize: 16,
-    fontWeight: "bold",
+  content: {
+    padding: 16,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 10,
+    marginBottom: 16,
   },
 });

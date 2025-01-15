@@ -1,194 +1,113 @@
-import React, { useState, useEffect, useCallback } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  ActivityIndicator,
-  Alert,
-  TouchableOpacity,
-} from "react-native";
-import { fetchWeatherAndDaylight } from "@/util/fetchWeatherAndDaylight";
-import { getCurrentLocation } from "@/util/location";
-import Constants from "expo-constants";
-import { Ionicons } from "@expo/vector-icons";
+// app/screens/FiveDayForecastScreen.tsx
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { getCurrentLocation } from "@/utils/location";
+import { fetchWeatherAndDaylight } from "@/utils/fetchWeatherAndDaylight";
+import { fetchSchedules } from "@/utils/storage";
 
-type ScheduleItem = {
-  description: string;
-  startTime: string;
-  endTime: string;
-};
+const backgroundImage = require("@/assets/images/backgroundFDS.jpg");
 
-type DaylightData = {
-  sunrise: string | null;
-  sunset: string | null;
-};
+export default function FiveDayForecastScreen() {
+  const [forecastData, setForecastData] = useState<any[]>([]);
+  const [allSchedules, setAllSchedules] = useState<{ [key: string]: any[] }>({});
+  const [error, setError] = useState<string | null>(null);
 
-type WeatherData = {
-  dt_txt: string; // ISO date string
-  weather: {
-    main: string;
-    description: string;
-    temperature: number;
-  };
-  daylight: DaylightData;
-};
-
-type CombinedData = {
-  date: string;
-  schedules: ScheduleItem[];
-  daylight: DaylightData;
-  weather: string;
-  temp: string; // Displayed as °C
-};
-
-export default function FiveDayScreen() {
-  const [combinedData, setCombinedData] = useState<CombinedData[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [refreshing, setRefreshing] = useState<boolean>(false);
-
-  const fetchCombinedData = async () => {
+  const fetchFiveDayData = async () => {
     try {
-      setLoading(true);
+        const location = await getCurrentLocation();
+        const weatherData = await fetchWeatherAndDaylight(
+            location.latitude,
+            location.longitude
+        );
 
-      // Get location
-      const location = await getCurrentLocation();
-      const apiKey = Constants.expoConfig?.extra?.OPENWEATHERMAP_API_KEY;
-      if (!apiKey) {
-        throw new Error("Missing OpenWeatherMap API key in configuration.");
-      }
+        // ✅ Defensive check for weatherData structure
+        if (!weatherData?.list || !weatherData?.city) {
+            throw new Error("Incomplete weather data received.");
+        }
 
-      // Fetch weather and daylight data
-      const weatherData: WeatherData[] = await fetchWeatherAndDaylight(
-        location.latitude,
-        location.longitude,
-        apiKey
-      );
+        // ✅ Safely map the forecast days with optional chaining
+        const forecastDays = weatherData.list.map((entry: any) => ({
+            date: entry?.dt_txt?.split(" ")[0] ?? "N/A",
+            main: entry?.weather?.[0]?.main ?? "N/A",
+            temp: entry?.main?.temp ?? "N/A",
+        }));
 
-      // Combine the data for display
-      const combined = weatherData.map((day) => ({
-        date: new Date(day.dt_txt).toLocaleDateString(undefined, {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        }),
-        schedules: [], // Replace with actual schedules
-        daylight: {
-          sunrise: day.daylight.sunrise || "N/A",
-          sunset: day.daylight.sunset || "N/A",
-        },
-        weather: day.weather.main,
-        temp: `${Math.round(day.weather.temperature)}°C`,
-      }));
+        // ✅ Defensive check for city sunrise/sunset data
+        const sunrise = weatherData?.city?.sunrise
+            ? new Date(weatherData.city.sunrise * 1000).toLocaleTimeString()
+            : "N/A";
+        const sunset = weatherData?.city?.sunset
+            ? new Date(weatherData.city.sunset * 1000).toLocaleTimeString()
+            : "N/A";
 
-      setCombinedData(combined);
+        setForecastData(
+            forecastDays.map((day) => ({
+                ...day,
+                sunrise,
+                sunset,
+            }))
+        );
     } catch (error) {
-      Alert.alert(
-        "Error",
-        "Failed to fetch weather or location data. Please try again.",
-        [{ text: "Retry", onPress: fetchCombinedData }]
-      );
-      console.error("Error fetching combined data:", error);
-    } finally {
-      setLoading(false);
+        console.error("Error fetching forecast data:", error);
+        setError("Failed to fetch the forecast data.");
     }
-  };
+};
 
   useEffect(() => {
-    fetchCombinedData();
+    fetchFiveDayData();
   }, []);
 
-  const renderCard = useCallback(
-    ({ item }: { item: CombinedData }) => (
-      <View style={styles.card}>
-        <Text style={styles.dateText}>{item.date}</Text>
-
-        {/* Weather Information */}
-        <View style={styles.row}>
-          <Ionicons name="cloud-outline" size={20} color="#555" />
-          <Text style={styles.weatherText}>
-            {item.weather}, {item.temp}
-          </Text>
-        </View>
-
-        {/* Daylight Information */}
-        <View style={styles.row}>
-          <Ionicons name="sunny-outline" size={20} color="#555" />
-          <Text style={styles.daylightText}>
-            Sunrise: {item.daylight.sunrise}, Sunset: {item.daylight.sunset}
-          </Text>
-        </View>
-
-        {/* Schedules */}
-        <Text style={styles.scheduleHeader}>Schedules:</Text>
-        {item.schedules.length > 0 ? (
-          item.schedules.map((schedule, index) => (
-            <TouchableOpacity key={index} style={styles.scheduleItem}>
-              <Text>
-                {schedule.startTime} - {schedule.endTime}: {schedule.description}
-              </Text>
-            </TouchableOpacity>
-          ))
-        ) : (
-          <Text style={styles.noSchedulesText}>No schedules for this day.</Text>
-        )}
-      </View>
-    ),
-    []
-  );
-
-  const keyExtractor = useCallback((item: CombinedData) => item.date, []);
-
-  if (loading) {
-    return (
-      <View style={styles.loaderContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
-      </View>
-    );
-  }
-
   return (
-    <FlatList
-      data={combinedData}
-      keyExtractor={keyExtractor}
-      contentContainerStyle={styles.listContainer}
-      renderItem={renderCard}
-      refreshing={refreshing}
-      onRefresh={async () => {
-        setRefreshing(true);
-        await fetchCombinedData();
-        setRefreshing(false);
-      }}
-      ItemSeparatorComponent={() => <View style={styles.separator} />}
-    />
+    <ScrollView contentContainerStyle={styles.container}>
+      {/* ✅ Error Handling */}
+      {error ? (
+        <Text style={styles.errorText}>{error}</Text>
+      ) : (
+        forecastData.map((day, index) => (
+          <View key={index} style={styles.card}>
+            {/* ✅ Weather Section */}
+            <Text style={styles.dateText}>{day.date}</Text>
+            <Text style={styles.weatherText}>Weather: {day.main}</Text>
+            <Text style={styles.weatherText}>Temp: {day.temp}°C</Text>
+
+            {/* ✅ Daylight Section */}
+            <Text style={styles.daylightText}>
+              Sunrise: {day.sunrise} | Sunset: {day.sunset}
+            </Text>
+
+            {/* ✅ Schedule Section */}
+            <Text style={styles.scheduleHeader}>Schedule:</Text>
+            {allSchedules[day.date]?.length > 0 ? (
+              allSchedules[day.date].map((schedule, idx) => (
+                <Text key={idx} style={styles.scheduleText}>
+                  {schedule.startTime} - {schedule.endTime}: {schedule.description}
+                </Text>
+              ))
+            ) : (
+              <Text style={styles.noSchedulesText}>No schedules for this day.</Text>
+            )}
+          </View>
+        ))
+      )}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  container: { padding: 16, backgroundColor: "#f9f9f9" },
   card: {
     backgroundColor: "#fff",
-    borderRadius: 8,
-    elevation: 3,
-    marginBottom: 16,
+    borderRadius: 10,
     padding: 16,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
+    marginBottom: 16,
+    elevation: 3,
   },
-  dateText: { fontSize: 18, fontWeight: "bold", marginBottom: 8 },
-  daylightText: { fontSize: 16, marginLeft: 8 },
-  listContainer: { padding: 16 },
-  loaderContainer: { alignItems: "center", flex: 1, justifyContent: "center" },
-  noSchedulesText: { color: "gray", fontSize: 14, fontStyle: "italic" },
-  row: { alignItems: "center", flexDirection: "row", marginBottom: 4 },
-  scheduleHeader: { fontSize: 16, fontWeight: "600", marginTop: 8 },
-  scheduleItem: {
-    backgroundColor: "#f9f9f9",
-    borderRadius: 8,
-    marginBottom: 4,
-    padding: 8,
-  },
-  separator: { backgroundColor: "#ccc", height: 1, marginVertical: 8 },
-  weatherText: { fontSize: 16, marginLeft: 8 },
+  dateText: { fontSize: 20, fontWeight: "bold" },
+  weatherText: { fontSize: 16, marginTop: 8 },
+  daylightText: { fontSize: 16, marginVertical: 8 },
+  scheduleHeader: { fontSize: 18, fontWeight: "bold", marginTop: 12 },
+  scheduleText: { fontSize: 16, marginTop: 4 },
+  noSchedulesText: { fontSize: 16, fontStyle: "italic", color: "gray" },
+  errorText: { color: "red", textAlign: "center", marginTop: 20 },
 });
+

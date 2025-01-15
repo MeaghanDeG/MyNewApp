@@ -1,6 +1,6 @@
 // app/index.tsx
 import React, { useState } from "react";
-import AnimatedSplashScreen from "./components/AnimatedSplashScreen";
+import AnimatedSplashScreen from "@/components/AnimatedSplashScreen";
 import { Redirect } from "expo-router";
 
 export default function Index() {
@@ -10,10 +10,11 @@ export default function Index() {
     setIsSplashVisible(false);
   };
 
+  // ✅ Show splash only when `isSplashVisible` is true
   if (isSplashVisible) {
     return <AnimatedSplashScreen onFinish={handleSplashFinish} />;
   }
 
-  // Redirect to the home screen after the splash screen
-  return <Redirect href="../home" />;
+  // ✅ Correct navigation after splash ends
+  return <Redirect href="/HomeScreen" />;
 }

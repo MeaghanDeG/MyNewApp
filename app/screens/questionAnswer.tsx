@@ -7,10 +7,14 @@ import {
   Modal,
   Dimensions,
 } from "react-native";
+import { useRouter } from "expo-router";
 
 export default function QuestionAnswer() {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalContent, setModalContent] = useState<string>("");
+  const [questionsAnswered, setQuestionsAnswered] = useState(0);
+  const totalQuestions = 6;
+  const router = useRouter(); // ✅ Added for navigation
 
   const handleResponse = (response: string, question: string) => {
     const content = response === "yes"
@@ -18,12 +22,17 @@ export default function QuestionAnswer() {
       : `You answered "No" to: ${question}`;
     setModalContent(content);
     setModalVisible(true);
+    setQuestionsAnswered((prev) => prev + 1); // ✅ Count questions answered
   };
 
   const closeModal = () => {
     setModalVisible(false);
-  };
 
+    // ✅ Redirect to settings after all questions answered
+    if (questionsAnswered >= totalQuestions) {
+      router.push("/screens/SettingsScreen"); // ✅ Adjust the route to your settings screen
+    }
+  };
   return (
     <View style={styles.container}>
       {/* Modal */}
@@ -56,17 +65,8 @@ export default function QuestionAnswer() {
               )
             }
           >
-            <Text style={styles.buttonText}>Yes</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.button, styles.noButton]}
-            onPress={() =>
-              handleResponse(
-                "no",
-                "Have you used a SAD lamp in the past?"
-              )
-            }
-          >
+           
+          
             <Text style={styles.buttonText}>No</Text>
           </TouchableOpacity>
         </View>
@@ -113,7 +113,7 @@ export default function QuestionAnswer() {
             onPress={() =>
               handleResponse(
                 "yes",
-                "Are you having any problems with your eyesight? Are you finding your eyes sensitive to sunlight?"
+                "Are you finding your eyes sensitive to sunlight?"
               )
             }
           >

@@ -39,7 +39,7 @@ babel.config.js
 
 # =====================
 # ✅ Native Project Files (iOS and Android)
-# You can remove android/ and ios/ if using managed workflow only
+# 
 # =====================
 android/
 ios/

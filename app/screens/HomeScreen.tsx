@@ -7,112 +7,72 @@ import {
   TouchableOpacity,
   Alert,
   Button,
+  ImageBackground,
 } from "react-native";
-import { fetchWeatherAndDaylight } from "../../util/fetchWeatherAndDaylight";
-import { saveData, loadData } from "../../util/storage";
-import { OPEN_WEATHER_API_KEY } from "@env";
+import { fetchWeatherAndDaylight } from "../utils/fetchWeatherAndDaylight";
+import { saveData, loadData } from "../utils/storage";
+import getCurrentLocation from "../utils/location";
+import { WeatherData, ScheduleItem, TodayData } from "@/utils/types";
+import suggestSadLampSlot from "@/utils/sadLampScheduler";
 
-// Define types for the data structures
-type ScheduleItem = {
-  id: string;
-  startTime: string;
-  endTime: string;
-  description: string;
-};
+// Import weather icons from Expo icons library
+import { FontAwesome5 } from "@expo/vector-icons";
 
-type WeatherData = {
-  main: string;
-  description: string;
-  temperature: number;
-};
-
-type DaylightData = {
-  sunrise: string;
-  sunset: string;
-};
-
-type TodayData = {
-  date: string;
-  schedule: ScheduleItem[];
-  weather?: WeatherData;
-  daylight?: DaylightData;
-};
+// Import the background image correctly
+import backgroundImage from "../assets/images/backgroundHS.jpg";
 
 export default function HomeScreen() {
   const [todayData, setTodayData] = useState<TodayData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  
 
+  // ✅ Day/Night Check Logic
+  const isDaytime = () => {
+    if (!todayData?.daylight) return true;
+    const currentTime = new Date().getHours();
+    const sunriseTime = new Date(todayData.daylight.sunrise).getHours();
+    const sunsetTime = new Date(todayData.daylight.sunset).getHours();
+    return currentTime >= sunriseTime && currentTime < sunsetTime;
+  };
+
+  // ✅ Fetching Weather and Daylight Data
   const loadTodayData = async () => {
     try {
-      const today = new Date().toISOString().split("T")[0]; // Format: YYYY-MM-DD
+      const today = new Date().toISOString().split("T")[0];
+      const { latitude, longitude } = await getCurrentLocation();
+      const weatherAndDaylightData = await fetchWeatherAndDaylight(latitude, longitude);
 
-      // Fetch user's location
-      const location = await loadData("userLocation");
-      if (!location) {
-        Alert.alert(
-          "Error",
-          "Location not set. Update your location in Settings."
-        );
-        return;
+      // ✅ Ensure data structure exists before accessing
+      if (!weatherAndDaylightData.sys) {
+        throw new Error("Sunrise and Sunset data missing.");
       }
 
-      const { latitude, longitude } = location;
-
-      // Fetch and combine weather and daylight data
-      const weatherAndDaylightData = await fetchWeatherAndDaylight(
-        latitude,
-        longitude,
-        
-      );
-      await saveData("weatherAndDaylight", weatherAndDaylightData);
+      const sunrise = weatherAndDaylightData.sys?.sunrise
+      ? new Date(weatherAndDaylightData.sys.sunrise * 1000).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+      })
+      : "N/A";
+      const sunset = weatherAndDaylightData.sys?.sunset
+      ? new Date(weatherAndDaylightData.sys.sunset * 1000).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+      })
+      : "N/A";
 
       const schedules = await loadData("schedules");
-      const todaySchedule: ScheduleItem[] = schedules?.[today] || [];
+      const todaySchedule = schedules?.[today] || [];
 
-      if (!todaySchedule.length && !weatherAndDaylightData.length) {
-        setError("No data available for today.");
-        return;
-      }
-
-      const todayWeather = weatherAndDaylightData.find((entry: any) =>
-        entry.dt_txt.startsWith(today)
-      );
-
+      const suggestedLampTime = await suggestSadLampSlot(today, { sunrise, sunset }, todaySchedule);
       setTodayData({
         date: today,
         schedule: todaySchedule,
-        weather: todayWeather?.weather || undefined,
-        daylight: todayWeather?.daylight || undefined,
+        weather: weatherAndDaylightData,
+        daylight: { sunrise, sunset },
+        sadLampTime: suggestedLampTime || "No available time today",
       });
-    } catch (err) {
-      console.error("Error loading today's data:", err);
+    } catch (error) {
+      console.error("Error loading data:", error);
       setError("Failed to load today's data.");
-    }
-  };
-
-  const handleKeep = async () => {
-    try {
-      const today = new Date().toISOString().split("T")[0];
-      await saveData(`response-${today}`, "kept");
-      Alert.alert("Saved", "You kept today's schedule.");
-    } catch (error) {
-      console.error("Error saving response:", error);
-    }
-  };
-
-  const handleEdit = () => {
-    Alert.alert("Edit", "Navigate to the schedule editor.");
-    // Add navigation logic if applicable
-  };
-
-  const handleDontSave = async () => {
-    try {
-      const today = new Date().toISOString().split("T")[0];
-      await saveData(`response-${today}`, "not saved");
-      Alert.alert("Updated", "You chose not to save today's schedule.");
-    } catch (error) {
-      console.error("Error saving response:", error);
     }
   };
 
@@ -120,10 +80,52 @@ export default function HomeScreen() {
     loadTodayData();
   }, []);
 
+  // ✅ Button Handlers
+  const handleKeep = async () => {
+    const today = new Date().toISOString().split("T")[0];
+    await saveData(`response-${today}`, "kept");
+    Alert.alert("Success", "You kept today's schedule.");
+  };
+
+  const handleEdit = () => {
+    Alert.alert("Edit", "Navigating to the schedule editor...");
+  };
+
+  const handleDontSave = async () => {
+    const today = new Date().toISOString().split("T")[0];
+    await saveData(`response-${today}`, "not saved");
+    Alert.alert("Updated", "You chose not to save today's schedule.");
+  };
+
+  // ✅ Determine Weather Icon
+  const getWeatherIcon = (weather: string | undefined) => {
+    switch (weather) {
+      case "Clear":
+        return "sun";
+      case "Clouds":
+        return "cloud";
+      case "Rain":
+        return "cloud-rain";
+      case "Snow":
+        return "snowflake";
+      case "Thunderstorm":
+        return "bolt";
+      default:
+        return "cloud-sun";
+    }
+  };
+
+  // ✅ Error Handling
   if (error) {
-    return <Text style={styles.error}>{error}</Text>;
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>{error}</Text>
+        <Button title="Retry" onPress={loadTodayData} />
+      </View>
+    );
   }
 
+  // ✅ Loading State Handling
   if (!todayData) {
     return (
       <View style={styles.loaderContainer}>
@@ -133,41 +135,57 @@ export default function HomeScreen() {
     );
   }
 
+  // ✅ Main Screen Return
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* Weather and Daylight Data */}
-      <View style={styles.card}>
-        <Text style={styles.dateText}>Today: {todayData.date}</Text>
-        <Text style={styles.weatherText}>
-          Weather: {todayData.weather?.main || "N/A"},{" "}
-          {todayData.weather?.description || "N/A"} Temp:{" "}
-          {todayData.weather?.temperature || "N/A"}°C
-        </Text>
-        <Text style={styles.daylightText}>
-          Sunrise: {todayData.daylight?.sunrise || "N/A"}, Sunset:{" "}
-          {todayData.daylight?.sunset || "N/A"}
-        </Text>
-      </View>
+    <ImageBackground source={backgroundImage} style={styles.backgroundImage}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.container,
+          { backgroundColor: isDaytime() ? "rgba(135, 206, 235, 0.8)" : "rgba(44, 62, 80, 0.8)" },
+        ]}
+      >
+        {/* ✅ Weather Section with Icon */}
+        <View style={styles.weatherContainer}>
+          <FontAwesome5
+            name={getWeatherIcon(todayData.weather?.weather[0]?.main)}
+            size={50}
+            color={isDaytime() ? "#FDB813" : "#f0f0f0"}
+          />
+          <Text style={styles.weatherText}>
+            {todayData.weather?.weather[0]?.main || "N/A"} -{" "}
+            {todayData.weather?.main.temp || "N/A"}°C
+          </Text>
+        </View>
 
-      {/* Schedule Data */}
-      <View style={styles.card}>
-        <Text style={styles.scheduleHeader}>Today's Schedule:</Text>
-        {todayData.schedule.length > 0 ? (
-          todayData.schedule.map((item: ScheduleItem) => (
-            <Text key={item.id} style={styles.scheduleText}>
-              {item.startTime} - {item.endTime}: {item.description}
-            </Text>
-          ))
-        ) : (
-          <Text style={styles.noSchedulesText}>No schedules for today.</Text>
-        )}
-      </View>
+        {/* ✅ Sunrise/Sunset Section */}
+        <View style={styles.sunriseContainer}>
+          <Text style={styles.daylightText}>
+            🌅 Sunrise: {todayData.daylight?.sunrise || "N/A"} | 🌙 Sunset:{" "}
+            {todayData.daylight?.sunset || "N/A"}
+          </Text>
+        </View>
+        <View style={styles.card}>
+          <Text style={styles.scheduleHeader}>Use your SAD Lamp:</Text>
+          <Text style={styles.scheduleText}>
+              {todayData.sadLampTime || "No available time today"}
+          </Text>
+        </View>
 
-      {/* Actions Section */}
-      <View style={styles.card}>
-        <Text style={styles.questionText}>
-          Did you stick to today's schedule, or would you like to edit it?
-        </Text>
+        {/* ✅ Schedule Section */}
+        <View style={styles.card}>
+          <Text style={styles.scheduleHeader}>Your Schedule Today:</Text>
+          {todayData.schedule.length > 0 ? (
+            todayData.schedule.map((item: ScheduleItem) => (
+              <Text key={item.id} style={styles.scheduleText}>
+                {item.startTime} - {item.endTime}: {item.description}
+              </Text>
+            ))
+          ) : (
+            <Text style={styles.noSchedulesText}>No schedules for today.</Text>
+          )}
+        </View>
+        
+        {/* ✅ Action Buttons */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.keepButton} onPress={handleKeep}>
             <Text style={styles.buttonText}>Keep</Text>
@@ -175,72 +193,136 @@ export default function HomeScreen() {
           <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
             <Text style={styles.buttonText}>Edit</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.dontSaveButton}
-            onPress={handleDontSave}
-          >
+          <TouchableOpacity style={styles.dontSaveButton} onPress={handleDontSave}>
             <Text style={styles.buttonText}>Don't Save</Text>
           </TouchableOpacity>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </ImageBackground>
   );
 }
 
+// ✅ Styles Section
 const styles = StyleSheet.create({
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginTop: 16,
+  backgroundImage: {
+    flex: 1,
+    resizeMode: "cover",
   },
-  buttonText: {
-    color: "#ffffff",
-    fontSize: 16,
+  container: {
+    flexGrow: 1,
+    padding: 20,
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  weatherContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 20,
+  },
+  weatherText: {
+    fontSize: 24,
     fontWeight: "bold",
+    color: "#fff",
+    textAlign: "center",
+    marginTop: 10,
+  },
+  sunriseContainer: {
+    alignItems: "center",
+    paddingVertical: 15,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    borderRadius: 15,
+    padding: 10,
+    marginVertical: 20,
+  },
+  daylightText: {
+    fontSize: 18,
+    color: "#fff",
     textAlign: "center",
   },
   card: {
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    elevation: 3,
-    marginBottom: 16,
-    padding: 16,
+    width: "100%",
+    backgroundColor: "rgba(255,255,255,0.9)",
+    borderRadius: 15,
+    padding: 20,
+    marginVertical: 10,
     shadowColor: "#000",
-    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
     shadowRadius: 5,
+    elevation: 5,
   },
-  container: { backgroundColor: "#f9f9f9", padding: 16 },
-  dateText: { fontSize: 20, fontWeight: "bold", marginBottom: 8 },
-  daylightText: { fontSize: 16, marginBottom: 4 },
-  dontSaveButton: {
-    backgroundColor: "#dc3545",
-    borderRadius: 8,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-  },
-  editButton: {
-    backgroundColor: "#007bff",
-    borderRadius: 8,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-  },
-  error: { color: "red", fontSize: 16, textAlign: "center" },
-  keepButton: {
-    backgroundColor: "#28a745",
-    borderRadius: 8,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-  },
-  loaderContainer: { alignItems: "center", flex: 1, justifyContent: "center" },
-  messageText: { color: "gray", fontSize: 16 },
-  noSchedulesText: { color: "gray", fontSize: 14, fontStyle: "italic" },
-  questionText: {
-    fontSize: 16,
+  scheduleHeader: {
+    fontSize: 22,
     fontWeight: "bold",
-    marginBottom: 16,
+    marginBottom: 12,
+    color: "#333",
+  },
+  scheduleText: {
+    fontSize: 18,
+    marginVertical: 6,
+    color: "#333",
+  },
+  noSchedulesText: {
+    fontSize: 18,
+    fontStyle: "italic",
+    color: "#888",
     textAlign: "center",
   },
-  scheduleHeader: { fontSize: 18, fontWeight: "600", marginBottom: 8 },
-  scheduleText: { fontSize: 14, marginBottom: 4, marginLeft: 8 },
-  weatherText: { fontSize: 16, marginBottom: 4 },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingTop: 20,
+  },
+  buttonText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#fff",
+    textAlign: "center",
+  },
+  keepButton: {
+    flex: 1,
+    backgroundColor: "#28a745",
+    paddingVertical: 14,
+    borderRadius: 15,
+    marginHorizontal: 5,
+    alignItems: "center",
+  },
+  editButton: {
+    flex: 1,
+    backgroundColor: "#007bff",
+    paddingVertical: 14,
+    borderRadius: 15,
+    marginHorizontal: 5,
+    alignItems: "center",
+  },
+  dontSaveButton: {
+    flex: 1,
+    backgroundColor: "#dc3545",
+    paddingVertical: 14,
+    borderRadius: 15,
+    marginHorizontal: 5,
+    alignItems: "center",
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 18,
+    color: "red",
+    textAlign: "center",
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  messageText: {
+    fontSize: 20,
+    color: "#555",
+    textAlign: "center",
+  },
 });

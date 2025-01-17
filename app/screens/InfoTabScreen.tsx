@@ -1,4 +1,3 @@
-// app/screens/InfoTabScreen.tsx
 import React, { useState } from "react";
 import {
   View,
@@ -12,6 +11,7 @@ import FAQ from "@/screens/FAQ";
 import Info from "@/screens/info";
 import Resources from "@/screens/resources";
 import QuestionAnswer from "@/screens/questionAnswer";
+import { theme } from "@/theme";
 
 export default function InfoTabScreen() {
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
@@ -22,83 +22,56 @@ export default function InfoTabScreen() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* ✅ Question Section */}
-      <TouchableOpacity
-        style={styles.accordionHeader}
-        onPress={() => toggleSection("Question")}
-      >
-        <Text style={styles.headerText}>❓ Question & Answers</Text>
-      </TouchableOpacity>
-      {expandedSection === "Question" && (
-        <View style={styles.content}>
-          <QuestionAnswer />
-        </View>
-      )}
-
-      {/* ✅ FAQ Section */}
-      <TouchableOpacity
-        style={styles.accordionHeader}
-        onPress={() => toggleSection("FAQ")}
-      >
-        <Text style={styles.headerText}>📚 Frequently Asked Questions</Text>
-      </TouchableOpacity>
-      {expandedSection === "FAQ" && (
-        <View style={styles.content}>
-          <FAQ />
-        </View>
-      )}
-
-      {/* ✅ Info Section */}
-      <TouchableOpacity
-        style={styles.accordionHeader}
-        onPress={() => toggleSection("Info")}
-      >
-        <Text style={styles.headerText}>ℹ️ General Information</Text>
-      </TouchableOpacity>
-      {expandedSection === "Info" && (
-        <View style={styles.content}>
-          <Info />
-        </View>
-      )}
-
-      {/* ✅ Resources Section */}
-      <TouchableOpacity
-        style={styles.accordionHeader}
-        onPress={() => toggleSection("Resources")}
-      >
-        <Text style={styles.headerText}>📖 Resources & References</Text>
-      </TouchableOpacity>
-      {expandedSection === "Resources" && (
-        <View style={styles.content}>
-          <Resources />
-        </View>
-      )}
+    <ScrollView
+      contentContainerStyle={styles.container}
+      keyboardShouldPersistTaps="handled"
+    >
+      {[
+        { name: "Question", title: "❓ Question & Answers", content: <QuestionAnswer /> },
+        { name: "FAQ", title: "📚 Frequently Asked Questions", content: <FAQ /> },
+        { name: "Info", title: "ℹ️ General Information", content: <Info /> },
+        { name: "Resources", title: "📖 Resources & References", content: <Resources /> },
+      ].map((section) => (
+        <React.Fragment key={section.name}>
+          <TouchableOpacity
+            style={styles.accordionHeader}
+            onPress={() => toggleSection(section.name)}
+            accessibilityRole="button"
+            accessibilityLabel={`Toggle ${section.title}`}
+            accessibilityState={{ expanded: expandedSection === section.name }}
+          >
+            <Text style={styles.headerText}>{section.title}</Text>
+          </TouchableOpacity>
+          {expandedSection === section.name && (
+            <View style={styles.content}>{section.content}</View>
+          )}
+        </React.Fragment>
+      ))}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    padding: theme.spacing.medium,
     flexGrow: 1,
-    backgroundColor: "#FFF8E1",
+    backgroundColor: theme.colors.background,
   },
   accordionHeader: {
-    padding: 16,
-    backgroundColor: "#007BFF",
-    borderRadius: 10,
-    marginVertical: 8,
+    padding: theme.spacing.medium,
+    backgroundColor: theme.colors.primary,
+    borderRadius: theme.borderRadius.medium,
+    marginVertical: theme.spacing.small,
   },
   headerText: {
-    fontSize: 18,
+    fontSize: theme.fontSizes.medium,
     fontWeight: "bold",
-    color: "#fff",
+    color: theme.colors.secondaryText,
   },
   content: {
-    padding: 16,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 10,
-    marginBottom: 16,
+    padding: theme.spacing.medium,
+    backgroundColor: theme.colors.cardBackground,
+    borderRadius: theme.borderRadius.medium,
+    marginBottom: theme.spacing.medium,
   },
 });

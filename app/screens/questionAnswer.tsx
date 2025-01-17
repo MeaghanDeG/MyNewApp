@@ -1,320 +1,278 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import {
+  SafeAreaView,
   View,
   Text,
-  TouchableOpacity,
   StyleSheet,
+  FlatList,
   Modal,
-  Dimensions,
+  Animated,
 } from "react-native";
+import { BlurView } from "expo-blur";
 import { useRouter } from "expo-router";
+import { InteractiveButton } from "../components/InteractiveButton";
+import { theme } from "@/theme";
 
 export default function QuestionAnswer() {
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalContent, setModalContent] = useState<string>("");
-  const [questionsAnswered, setQuestionsAnswered] = useState(0);
-  const totalQuestions = 6;
-  const router = useRouter(); // ✅ Added for navigation
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [popupMessage, setPopupMessage] = useState<string | null>(null);
+  const [showFinalPopup, setShowFinalPopup] = useState(false);
+  const [showIntermediatePopup, setShowIntermediatePopup] = useState(false);
+  const [finalPopupMessage, setFinalPopupMessage] = useState<string | null>(
+    null
+  );
 
-  const handleResponse = (response: string, question: string) => {
-    const content = response === "yes"
-      ? `You answered "Yes" to: ${question}`
-      : `You answered "No" to: ${question}`;
-    setModalContent(content);
-    setModalVisible(true);
-    setQuestionsAnswered((prev) => prev + 1); // ✅ Count questions answered
+  const intermediateAnimation = useRef(new Animated.Value(0)).current;
+  const finalAnimation = useRef(new Animated.Value(0)).current;
+
+  const router = useRouter();
+
+  const animatePopup = (animation: Animated.Value, visible: boolean): void => {
+    Animated.timing(animation, {
+      toValue: visible ? 1 : 0,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
   };
 
-  const closeModal = () => {
-    setModalVisible(false);
+  useEffect(() => {
+    animatePopup(intermediateAnimation, showIntermediatePopup);
+  }, [showIntermediatePopup]);
 
-    // ✅ Redirect to settings after all questions answered
-    if (questionsAnswered >= totalQuestions) {
-      router.push("/screens/SettingsScreen"); // ✅ Adjust the route to your settings screen
-    }
+  useEffect(() => {
+    animatePopup(finalAnimation, showFinalPopup);
+  }, [showFinalPopup]);
+
+  type Question = {
+    id: number;
+    question: string;
+    answers: string[];
+    condition?: () => boolean;
+    onSelect: (response: string) => void;
   };
+
+  const questions: Question[] = [
+    {
+      id: 0,
+      question: "Have you used a SAD lamp in the past?",
+      answers: ["Yes", "No"],
+      onSelect: (response: string) => {
+        setAnswers((prev) => ({ ...prev, [0]: response }));
+        if (response === "No") {
+          setPopupMessage(
+            "No worries! This app will get you set up with customisable tools and the information you need!"
+          );
+          setShowIntermediatePopup(true);
+        } else {
+          setCurrentQuestionIndex(1); // Proceed to Question 1
+        }
+      },
+    },
+    {
+      id: 1,
+      question: "How often do you use your SAD lamp?",
+      answers: ["Everyday", "Sometimes"],
+      condition: () => answers[0] === "Yes",
+      onSelect: (response: string) => {
+        setAnswers((prev) => ({ ...prev, [1]: response }));
+        setPopupMessage("Everyday use of your SAD lamp is thought to be the most beneficial");
+        setCurrentQuestionIndex(2);
+      },
+    },
+    {
+      id: 2,
+      question: "When do you usually prefer to use a SAD lamp?",
+      answers: ["Morning", "Anytime"],
+      condition: () => answers[0] === "Yes",
+      onSelect: (response: string) => {
+        setAnswers((prev) => ({ ...prev, [2]: response }));
+        setPopupMessage(
+          "In the morning OR when you wake up is thought to be ideal"
+        );
+        setShowIntermediatePopup(true);
+      },
+    },
+    {
+      id: 4,
+      question: "Are you finding your eyes sensitive to sunlight?",
+      answers: ["Yes", "No"],
+      onSelect: (response: string) => {
+        setAnswers((prev) => ({ ...prev, [4]: response }));
+        setCurrentQuestionIndex(5);
+      },
+    },
+    {
+      id: 5,
+      question: "Have you ever been diagnosed as bipolar or having manic episodes?",
+      answers: ["Yes", "No"],
+      onSelect: (response: string) => {
+        setAnswers((prev) => ({ ...prev, [5]: response }));
+        setCurrentQuestionIndex(6);
+      },
+    },
+    {
+      id: 6,
+      question:
+        "Are you under the care of a physician or recently discharged from the hospital?",
+      answers: ["Yes", "No"],
+      onSelect: (response: string) => {
+        setAnswers((prev) => ({ ...prev, [6]: response }));
+        setCurrentQuestionIndex(7);
+      },
+    },
+    {
+      id: 7,
+      question:
+        "Are you taking any medication that makes you sensitive to sunlight or contraindicated for sunlight exposure?",
+      answers: ["Yes", "No"],
+      onSelect: (response: string) => {
+        setAnswers((prev) => ({ ...prev, [7]: response }));
+        const anyYes = [4, 5, 6, 7].some(
+          (key) => answers[key] === "Yes" || response === "Yes"
+        );
+        setFinalPopupMessage(
+          anyYes
+            ? "Please review your situation carefully and proceed with caution."
+            : "Good to Go"
+        );
+        setShowFinalPopup(true);
+      },
+    },
+  ];
+  
+  
+  const memoizedQuestions = useMemo(() => {
+    return questions.filter((q) => !q.condition || q.condition());
+  }, [answers]);
+  
   return (
-    <View style={styles.container}>
-      {/* Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={closeModal}
-      >
+    <SafeAreaView style={styles.safeArea}>
+      <FlatList
+        data={memoizedQuestions} // Use memoizedQuestions here
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => {
+          const isAnswered = answers[item.id] !== undefined;
+          const isCurrent = item.id === currentQuestionIndex;
+  
+          return (
+            <View
+              key={item.id}
+              style={[
+                styles.card,
+                isAnswered && !isCurrent ? styles.answeredCard : null,
+              ]}
+            >
+              {isAnswered && !isCurrent ? (
+                <BlurView intensity={50} style={styles.blur}>
+                  <Text style={styles.fadedHeading}>{item.question}</Text>
+                </BlurView>
+              ) : (
+                <>
+                  <Text style={styles.heading}>{item.question}</Text>
+                  <View style={styles.buttonContainer}>
+                    {item.answers.map((answer) => (
+                      <InteractiveButton
+                        key={answer}
+                        title={answer}
+                        onPress={() => item.onSelect(answer)}
+                      />
+                    ))}
+                  </View>
+                </>
+              )}
+            </View>
+          );
+        }}
+        contentContainerStyle={styles.scrollContainer}
+      />
+    
+  
+      {/* Intermediate Modal */}
+      <Modal visible={showIntermediatePopup} transparent animationType="fade">
         <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalText}>{modalContent}</Text>
-            <TouchableOpacity onPress={closeModal} style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
+          <View style={styles.popupContainer}>
+            <Text style={styles.popupText}>{popupMessage}</Text>
+            <InteractiveButton
+              title="Continue"
+              onPress={() => {
+                setShowIntermediatePopup(false);
+                setCurrentQuestionIndex(4);
+              }}
+            />
           </View>
         </View>
       </Modal>
 
-      {/* Questions */}
-      <View style={styles.card}>
-        <Text style={styles.heading}>Have you used a SAD lamp in the past?</Text>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[styles.button, styles.yesButton]}
-            onPress={() =>
-              handleResponse(
-                "yes",
-                "Have you used a SAD lamp in the past?"
-              )
-            }
-          >
-           
-          
-            <Text style={styles.buttonText}>No</Text>
-          </TouchableOpacity>
+      {/* Final Modal */}
+      <Modal visible={showFinalPopup} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.popupContainer}>
+            <Text style={styles.popupText}>{finalPopupMessage}</Text>
+            <InteractiveButton
+              title="Go to Settings"
+              onPress={() => router.push("/screens/SettingsScreen")}
+            />
+          </View>
         </View>
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.heading}>
-          When do you usually prefer to use a SAD lamp, if ever?
-        </Text>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[styles.button, styles.morningButton]}
-            onPress={() =>
-              handleResponse(
-                "Morning",
-                "When do you usually prefer to use a SAD lamp, if ever?"
-              )
-            }
-          >
-            <Text style={styles.buttonText}>Morning</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.button, styles.otherButton]}
-            onPress={() =>
-              handleResponse(
-                "Other",
-                "When do you usually prefer to use a SAD lamp, if ever?"
-              )
-            }
-          >
-            <Text style={styles.buttonText}>Other</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.heading}>
-          Are you having any problems with your eyesight? Are you finding your
-          eyes sensitive to sunlight?
-        </Text>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[styles.button, styles.yesButton]}
-            onPress={() =>
-              handleResponse(
-                "yes",
-                "Are you finding your eyes sensitive to sunlight?"
-              )
-            }
-          >
-            <Text style={styles.buttonText}>Yes</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.button, styles.noButton]}
-            onPress={() =>
-              handleResponse(
-                "no",
-                "Are you having any problems with your eyesight? Are you finding your eyes sensitive to sunlight?"
-              )
-            }
-          >
-            <Text style={styles.buttonText}>No</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.heading}>
-          Have you ever been diagnosed as bipolar or as having manic episodes?
-        </Text>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[styles.button, styles.yesButton]}
-            onPress={() =>
-              handleResponse(
-                "yes",
-                "Have you ever been diagnosed as bipolar or as having manic episodes?"
-              )
-            }
-          >
-            <Text style={styles.buttonText}>Yes</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.button, styles.noButton]}
-            onPress={() =>
-              handleResponse(
-                "no",
-                "Have you ever been diagnosed as bipolar or as having manic episodes?"
-              )
-            }
-          >
-            <Text style={styles.buttonText}>No</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.heading}>
-          Are you under the care of a physician or recently discharged from the
-          hospital?
-        </Text>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[styles.button, styles.yesButton]}
-            onPress={() =>
-              handleResponse(
-                "yes",
-                "Are you under the care of a physician or recently discharged from the hospital?"
-              )
-            }
-          >
-            <Text style={styles.buttonText}>Yes</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.button, styles.noButton]}
-            onPress={() =>
-              handleResponse(
-                "no",
-                "Are you under the care of a physician or recently discharged from the hospital?"
-              )
-            }
-          >
-            <Text style={styles.buttonText}>No</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.heading}>
-          Are you taking any medication that makes you sensitive to sunlight or
-          contraindicated for sunlight exposure?
-        </Text>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[styles.button, styles.yesButton]}
-            onPress={() =>
-              handleResponse(
-                "yes",
-                "Are you taking any medication that makes you sensitive to sunlight or contraindicated for sunlight exposure?"
-              )
-            }
-          >
-            <Text style={styles.buttonText}>Yes</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.button, styles.noButton]}
-            onPress={() =>
-              handleResponse(
-                "no",
-                "Are you taking any medication that makes you sensitive to sunlight or contraindicated for sunlight exposure?"
-              )
-            }
-          >
-            <Text style={styles.buttonText}>No</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </View>
+      </Modal>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  button: {
-    borderRadius: 5,
-    paddingHorizontal: 30,
-    paddingVertical: 12,
+  safeArea: {
+    flex: 1,
+    paddingTop: theme.spacing.large,
+    backgroundColor: theme.colors.background,
+  },
+  scrollContainer: {
+    padding: theme.spacing.medium,
+  },
+  card: {
+    backgroundColor: theme.colors.cardBackground,
+    borderRadius: theme.spacing.small,
+    padding: theme.spacing.medium,
+    marginBottom: theme.spacing.medium,
+    shadowColor: theme.colors.border,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+  },
+  answeredCard: {
+    transform: [{ scale: 0.85 }],
+    opacity: 0.6,
+    backgroundColor: "transparent",
+  },
+  blur: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
   },
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 10,
-    width: "100%",
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  card: {
-    alignItems: "center",
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    marginBottom: 20,
-    padding: 25,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    width: Dimensions.get("window").width * 0.9,
-  },
-  closeButton: {
-    backgroundColor: "#007BFF",
-    borderRadius: 5,
-    paddingHorizontal: 25,
-    paddingVertical: 10,
-  },
-  closeButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  container: {
-    alignItems: "center",
-    backgroundColor: "#FFF8E1",
-    flex: 1,
-    justifyContent: "center",
-    padding: 20,
   },
   heading: {
-    color: "#333",
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 15,
-    textAlign: "center",
+    fontSize: theme.fontSizes.large,
+    color: theme.colors.text,
   },
-  modalCard: {
-    alignItems: "center",
-    backgroundColor: "white",
-    borderRadius: 12,
-    padding: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    width: Dimensions.get("window").width * 0.8,
+  fadedHeading: {
+    fontSize: theme.fontSizes.large,
+    color: theme.colors.fadedText,
   },
   modalOverlay: {
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
     flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "center",
+    alignItems: "center",
   },
-  modalText: {
-    color: "#444",
-    fontSize: 18,
-    marginBottom: 15,
-    textAlign: "center",
+  popupContainer: {
+    backgroundColor: theme.colors.cardBackground,
+    padding: theme.spacing.large,
+    borderRadius: theme.spacing.small,
   },
-  morningButton: {
-    backgroundColor: "#1E9088",
-  },
-  noButton: {
-    backgroundColor: "#1E9088",
-  },
-  otherButton: {
-    backgroundColor: "#1E9088",
-  },
-  yesButton: {
-    backgroundColor: "#1E9088",
+  popupText: {
+    color: theme.colors.text,
   },
 });

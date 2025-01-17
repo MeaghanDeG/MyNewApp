@@ -14,7 +14,7 @@ export default {
       backgroundColor: "#ffffff"
     },
     assets: [
-      ".app./assets/fonts/SpaceMono-Regular.ttf"
+      "./app/assets/fonts/SpaceMono-Regular.ttf" 
     ],
     plugins: ["expo-router"],
     ios: {

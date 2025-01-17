@@ -1,8 +1,8 @@
 // app/components/Themed.tsx (Fixed Default Export and Theming)
 import React from "react";
 import { Text as DefaultText, View as DefaultView, StyleSheet } from "react-native";
-import Colors from "../constants/Colors";
-import { useColorScheme } from "./useColorScheme";
+import Colors from "../theme";
+import { useColorScheme } from "@/theme";
 
 export function useThemeColor(
   props: { light?: string; dark?: string },

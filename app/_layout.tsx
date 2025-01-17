@@ -1,37 +1,36 @@
-// app/_layout.tsx
 import React, { useEffect } from "react";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import { SafeAreaView, StyleSheet, ActivityIndicator } from "react-native";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import {
+  StyleSheet,
+  ActivityIndicator,
+  View,
+  TouchableOpacity,
+} from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { NavigationContainer } from "@react-navigation/native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { useColorScheme } from "react-native";
-import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
+import { theme } from "@/theme"; // Import your theme object
 
-// Import Screens (No Tabs Folder)
+// Import Screens
 import HomeScreen from "@/screens/HomeScreen";
+import InfoTabScreen from "@/screens/InfoTabScreen";
 import FiveDayScreen from "@/screens/FiveDayScreen";
 import ScheduleScreen from "@/screens/ScheduleScreen";
-import SettingsScreen from "@/screens/SettingsScreen";
-import InfoTabScreen from "@/screens/InfoTabScreen";
+import { useRouter, Stack } from "expo-router";
 
 SplashScreen.preventAutoHideAsync();
 
-// ✅ Initialize Bottom Tab Navigator
 const Tab = createBottomTabNavigator();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  const router = useRouter();
 
-  // ✅ Load Fonts
   const [fontsLoaded, fontError] = useFonts({
     SpaceMono: require("../app/assets/fonts/SpaceMono-Regular.ttf"),
     ...FontAwesome.font,
   });
 
-  // ✅ Handle Font Loading
   useEffect(() => {
     if (fontError) {
       console.error("Font loading error:", fontError);
@@ -44,53 +43,79 @@ export default function RootLayout() {
     }
   }, [fontsLoaded]);
 
-  // ✅ Show Loading Screen Until Fonts Load
   if (!fontsLoaded) {
     return (
-      <SafeAreaView style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#1E9088" />
-      </SafeAreaView>
+      <SafeAreaProvider>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </View>
+      </SafeAreaProvider>
     );
   }
 
-  // ✅ Main App Layout Using Bottom Tabs
   return (
     <SafeAreaProvider>
-           <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+      <SafeAreaView style={styles.safeArea}>
         <Tab.Navigator
           screenOptions={({ route }) => ({
             tabBarIcon: ({ color, size }) => {
-              let iconName: string = "home";
+              let iconName = "home";
               if (route.name === "Home") iconName = "home";
               else if (route.name === "Info") iconName = "info-circle";
-              else if (route.name === "Settings") iconName = "cog";
+              else if (route.name === "FiveDay") iconName = "calendar";
+              else if (route.name === "Schedule") iconName = "clock";
               return <FontAwesome name={iconName} size={size} color={color} />;
             },
-            tabBarActiveTintColor: "#007BFF",
-            tabBarInactiveTintColor: "gray",
+            tabBarActiveTintColor: theme.colors.primaryText,
+            tabBarInactiveTintColor: theme.colors.secondaryText,
+            tabBarStyle: {
+              backgroundColor: theme.colors.background,
+              borderTopColor: theme.colors.border,
+            },
             headerShown: false,
           })}
         >
           <Tab.Screen name="Home" component={HomeScreen} />
           <Tab.Screen name="Info" component={InfoTabScreen} />
-          <Tab.Screen name="Settings" component={SettingsScreen} />
+          <Tab.Screen name="FiveDay" component={FiveDayScreen} />
+          <Tab.Screen name="Schedule" component={ScheduleScreen} />
         </Tab.Navigator>
-      </ThemeProvider>
+
+        {/* Floating Settings Icon */}
+        <TouchableOpacity
+          style={styles.floatingButton}
+          onPress={() => router.push("/screens/SettingsScreen")}
+        >
+          <FontAwesome name="cog" size={24} color={theme.colors.primaryText} />
+        </TouchableOpacity>
+      </SafeAreaView>
     </SafeAreaProvider>
   );
 }
 
-
-// ✅ Styles
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: theme.colors.background, // Use background from theme
+    paddingTop: theme.spacing.large, // Add large padding at the top
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#FFF8E1",
+    backgroundColor: theme.colors.background, // Use background from theme
   },
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#FFF8E1",
+  floatingButton: {
+    position: "absolute",
+    bottom: theme.spacing.large,
+    right: theme.spacing.large,
+    backgroundColor: theme.colors.primary, // Primary button background
+    borderRadius: theme.borderRadius.large,
+    padding: theme.spacing.medium,
+    shadowColor: theme.colors.border,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
 });

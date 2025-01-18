@@ -11,9 +11,9 @@ import FAQ from "@/screens/FAQ";
 import Info from "@/screens/info";
 import Resources from "@/screens/resources";
 import QuestionAnswer from "@/screens/questionAnswer";
-import { theme } from "@/theme";
+import theme  from "@/theme";
 
-export default function InfoTabScreen() {
+export function InfoTabScreen() {
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
   const toggleSection = (sectionName: string) => {
@@ -75,3 +75,6 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.medium,
   },
 });
+
+export default InfoTabScreen;
+

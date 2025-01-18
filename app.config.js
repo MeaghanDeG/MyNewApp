@@ -9,7 +9,7 @@ export default {
     orientation: "portrait",
     icon: "./app/assets/images/icon.png",
     splash: {
-      image: "./app/assets/images/splash-animated.gif",
+      image: "./app/assets/images/static-splash.jpg",
       resizeMode: "contain",
       backgroundColor: "#ffffff"
     },

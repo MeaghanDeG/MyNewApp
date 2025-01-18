@@ -9,7 +9,9 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@expo/vector-icons": "^14.0.4",
     "@react-native-async-storage/async-storage": "^1.23.1",
+    "@react-native-community/slider": "^4.5.5",
     "expo": "^52.0.25",
     "expo-asset": "~11.0.1",
     "expo-blur": "^14.0.2",
@@ -38,7 +40,6 @@
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@types/react": "^18.3.12",
-    "@types/react-native": "^0.72.8",
     "babel-plugin-module-resolver": "^5.0.2",
     "babel-preset-expo": "^12.0.6",
     "typescript": "^5.7.3"

@@ -1,79 +1,93 @@
-import React, { useEffect } from "react";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import React, { useState, useEffect } from "react";
 import {
+  SafeAreaView,
   StyleSheet,
-  ActivityIndicator,
-  View,
   TouchableOpacity,
+  View,
 } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { useFonts } from "expo-font";
-import * as SplashScreen from "expo-splash-screen";
-import { theme } from "@/theme"; // Import your theme object
+import { useRouter } from "expo-router";
+import { Asset } from "expo-asset"; // Import Asset from Expo
+import CustomSplashScreen from "@/components/CustomSplashScreen";
+import theme from "@/theme";
 
 // Import Screens
 import HomeScreen from "@/screens/HomeScreen";
 import InfoTabScreen from "@/screens/InfoTabScreen";
 import FiveDayScreen from "@/screens/FiveDayScreen";
 import ScheduleScreen from "@/screens/ScheduleScreen";
-import { useRouter, Stack } from "expo-router";
-
-SplashScreen.preventAutoHideAsync();
 
 const Tab = createBottomTabNavigator();
 
-export default function RootLayout() {
+// Define Icon Names
+type IconNames = "home" | "info-circle" | "calendar" | "marker";
+
+export default function Layout() {
+  const [isAppReady, setAppReady] = useState(false);
   const router = useRouter();
 
-  const [fontsLoaded, fontError] = useFonts({
-    SpaceMono: require("../app/assets/fonts/SpaceMono-Regular.ttf"),
-    ...FontAwesome.font,
-  });
-
   useEffect(() => {
-    if (fontError) {
-      console.error("Font loading error:", fontError);
-    }
-  }, [fontError]);
+    const loadResources = async () => {
+      try {
+        // Preload assets, including splash-animated.gif
+        await Asset.loadAsync(require("@/assets/images/splash-animated.gif"));
 
-  useEffect(() => {
-    if (fontsLoaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded]);
+        // Simulate additional resource loading if needed
+        await new Promise((resolve) => setTimeout(resolve, 2000));
 
-  if (!fontsLoaded) {
-    return (
-      <SafeAreaProvider>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-        </View>
-      </SafeAreaProvider>
-    );
+        setAppReady(true);
+      } catch (e) {
+        console.error("Error loading resources:", e);
+      }
+    };
+
+    loadResources();
+  }, []);
+
+  if (!isAppReady) {
+    return <CustomSplashScreen onFinish={() => setAppReady(true)} />;
   }
 
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.safeArea}>
         <Tab.Navigator
-          screenOptions={({ route }) => ({
-            tabBarIcon: ({ color, size }) => {
-              let iconName = "home";
-              if (route.name === "Home") iconName = "home";
-              else if (route.name === "Info") iconName = "info-circle";
-              else if (route.name === "FiveDay") iconName = "calendar";
-              else if (route.name === "Schedule") iconName = "clock";
-              return <FontAwesome name={iconName} size={size} color={color} />;
-            },
-            tabBarActiveTintColor: theme.colors.primaryText,
-            tabBarInactiveTintColor: theme.colors.secondaryText,
-            tabBarStyle: {
-              backgroundColor: theme.colors.background,
-              borderTopColor: theme.colors.border,
-            },
-            headerShown: false,
-          })}
+          screenOptions={({ route }) => {
+            let iconName: IconNames = "home"; // Default icon
+
+            // Map route names to FontAwesome icons
+            switch (route.name) {
+              case "Home":
+                iconName = "home";
+                break;
+              case "Info":
+                iconName = "info-circle";
+                break;
+              case "FiveDay":
+                iconName = "marker"; 
+                break;
+              case "Schedule":
+                iconName = "calendar";
+                break;
+              default:
+                break;
+            }
+
+            return {
+              tabBarIcon: ({ color, size }) => (
+                <FontAwesome icon={iconName} size={size} color={color} />
+              ),
+              headerShown: false,
+              tabBarActiveTintColor: theme.colors.primaryText,
+              tabBarInactiveTintColor: theme.colors.secondaryText,
+              tabBarStyle: {
+                backgroundColor: theme.colors.background,
+                borderTopColor: theme.colors.border,
+              },
+            };
+          }}
         >
           <Tab.Screen name="Home" component={HomeScreen} />
           <Tab.Screen name="Info" component={InfoTabScreen} />
@@ -96,20 +110,14 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: theme.colors.background, // Use background from theme
-    paddingTop: theme.spacing.large, // Add large padding at the top
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: theme.colors.background, // Use background from theme
+    backgroundColor: theme.colors.background,
+    paddingTop: theme.spacing.large,
   },
   floatingButton: {
     position: "absolute",
-    bottom: theme.spacing.large,
+    top: theme.spacing.large, // Adjust position to avoid overlapping tabs
     right: theme.spacing.large,
-    backgroundColor: theme.colors.primary, // Primary button background
+    backgroundColor: theme.colors.primary,
     borderRadius: theme.borderRadius.large,
     padding: theme.spacing.medium,
     shadowColor: theme.colors.border,

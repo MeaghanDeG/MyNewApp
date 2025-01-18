@@ -11,9 +11,9 @@ import {
 import { BlurView } from "expo-blur";
 import { useRouter } from "expo-router";
 import { InteractiveButton } from "../components/InteractiveButton";
-import { theme } from "@/theme";
+import  theme  from "@/theme";
 
-export default function QuestionAnswer() {
+export function questionAnswer() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [popupMessage, setPopupMessage] = useState<string | null>(null);
@@ -61,7 +61,7 @@ export default function QuestionAnswer() {
         setAnswers((prev) => ({ ...prev, [0]: response }));
         if (response === "No") {
           setPopupMessage(
-            "No worries! This app will get you set up with customisable tools and the information you need!"
+            "No worries! This app will get you set up with customisable tools in Settings. Enlighten yourself with our information and explore the links !"
           );
           setShowIntermediatePopup(true);
         } else {
@@ -72,7 +72,7 @@ export default function QuestionAnswer() {
     {
       id: 1,
       question: "How often do you use your SAD lamp?",
-      answers: ["Everyday", "Sometimes"],
+      answers: ["Everyday", "At Times"],
       condition: () => answers[0] === "Yes",
       onSelect: (response: string) => {
         setAnswers((prev) => ({ ...prev, [1]: response }));
@@ -133,8 +133,8 @@ export default function QuestionAnswer() {
         );
         setFinalPopupMessage(
           anyYes
-            ? "Please review your situation carefully and proceed with caution."
-            : "Good to Go"
+            ? "Please explore the information carefully as using a SAD lamp might not be right for you. They don't exactly mimic sunlight, just a heads up!"
+            : "Good to Go, Let's Get Started!"
         );
         setShowFinalPopup(true);
       },
@@ -166,6 +166,7 @@ export default function QuestionAnswer() {
               {isAnswered && !isCurrent ? (
                 <BlurView intensity={50} style={styles.blur}>
                   <Text style={styles.fadedHeading}>{item.question}</Text>
+                  <Text style={styles.answerText}>Your Answer: {answers[item.id]}</Text>
                 </BlurView>
               ) : (
                 <>
@@ -204,18 +205,22 @@ export default function QuestionAnswer() {
         </View>
       </Modal>
 
+      
       {/* Final Modal */}
-      <Modal visible={showFinalPopup} transparent animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.popupContainer}>
-            <Text style={styles.popupText}>{finalPopupMessage}</Text>
-            <InteractiveButton
-              title="Go to Settings"
-              onPress={() => router.push("/screens/SettingsScreen")}
-            />
+        <Modal visible={showFinalPopup} transparent animationType="fade">
+          <View style={styles.modalOverlay}>
+            <View style={styles.popupContainer}>
+              <Text style={styles.popupText}>{finalPopupMessage}</Text>
+              <InteractiveButton
+                title="OK"
+                onPress={() => {
+                  setShowFinalPopup(false); // Close the modal
+                }}
+              />
+            </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
+
     </SafeAreaView>
   );
 }
@@ -244,6 +249,11 @@ const styles = StyleSheet.create({
     opacity: 0.6,
     backgroundColor: "transparent",
   },
+  answerText: {
+    fontSize: theme.fontSizes.medium,
+    color: theme.colors.secondaryText,
+    marginTop: 8,
+  },
   blur: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
@@ -253,6 +263,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginTop: 10,
   },
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
+    padding: 20,
+  },
   heading: {
     fontSize: theme.fontSizes.large,
     color: theme.colors.text,
@@ -260,6 +277,11 @@ const styles = StyleSheet.create({
   fadedHeading: {
     fontSize: theme.fontSizes.large,
     color: theme.colors.fadedText,
+  },
+  message: {
+    fontSize: 18,
+    color: "#555",
+    textAlign: "center",
   },
   modalOverlay: {
     flex: 1,
@@ -276,3 +298,4 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
   },
 });
+export default questionAnswer;

@@ -2,7 +2,7 @@
 import React, { useRef } from "react";
 import { TouchableOpacity, Text, StyleSheet, GestureResponderEvent } from "react-native";
 import * as Animatable from "react-native-animatable";
-import { theme } from "@/theme"; // Adjust the path to your theme file
+import theme  from "@/theme"; // Adjust the path to your theme file
 
 type InteractiveButtonProps = {
   onPress: (event: GestureResponderEvent) => void; // Function triggered on press

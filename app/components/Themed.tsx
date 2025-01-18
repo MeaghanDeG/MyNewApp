@@ -1,25 +1,49 @@
-// app/components/Themed.tsx (Fixed Default Export and Theming)
 import React from "react";
 import { Text as DefaultText, View as DefaultView, StyleSheet } from "react-native";
-import Colors from "../theme";
-import { useColorScheme } from "@/theme";
+import theme from "@/theme"; // Import the theme
+import { useColorScheme } from "react-native";
 
 export function useThemeColor(
   props: { light?: string; dark?: string },
-  colorName: keyof typeof Colors.light & keyof typeof Colors.dark
+  colorName: keyof typeof theme.colors
 ) {
-  const theme = useColorScheme() ?? "light";
-  const colorFromProps = props[theme];
-  return colorFromProps ?? Colors[theme][colorName];
+  const colorScheme = useColorScheme() ?? "light";
+  const colorFromProps = props[colorScheme];
+  const themeColors = theme.colors;
+
+  return colorFromProps ?? themeColors[colorName];
 }
 
-export const ThemedText = ({ style, lightColor, darkColor, ...otherProps }: any) => {
+export const ThemedText = ({
+  style,
+  lightColor,
+  darkColor,
+  ...otherProps
+}: {
+  style?: any;
+  lightColor?: string;
+  darkColor?: string;
+  [key: string]: any;
+}) => {
   const color = useThemeColor({ light: lightColor, dark: darkColor }, "text");
   return <DefaultText style={[{ color }, style]} {...otherProps} />;
 };
 
-export const ThemedView = ({ style, lightColor, darkColor, ...otherProps }: any) => {
-  const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, "background");
+export const ThemedView = ({
+  style,
+  lightColor,
+  darkColor,
+  ...otherProps
+}: {
+  style?: any;
+  lightColor?: string;
+  darkColor?: string;
+  [key: string]: any;
+}) => {
+  const backgroundColor = useThemeColor(
+    { light: lightColor, dark: darkColor },
+    "background"
+  );
   return <DefaultView style={[{ backgroundColor }, style]} {...otherProps} />;
 };
 
@@ -33,9 +57,9 @@ const Themed = () => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    borderRadius: 10
-  }
+    padding: theme.spacing.medium,
+    borderRadius: theme.borderRadius.medium,
+  },
 });
 
 export default Themed;

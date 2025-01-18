@@ -14,7 +14,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-
+import  theme  from "@/theme";
 // ✅ State and functional component setup
 export default function ScheduleScreen() {
   const [selectedDate, setSelectedDate] = useState<string>("");

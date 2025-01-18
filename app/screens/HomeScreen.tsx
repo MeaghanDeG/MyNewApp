@@ -14,12 +14,12 @@ import { saveData, loadData } from "../utils/storage";
 import getCurrentLocation from "../utils/location";
 import { WeatherData, ScheduleItem, TodayData } from "@/utils/types";
 import suggestSadLampSlot from "@/utils/sadLampScheduler";
+import  theme  from "@/theme";
 
 // Import weather icons from Expo icons library
 import { FontAwesome5 } from "@expo/vector-icons";
 
-// Import the background image correctly
-import backgroundImage from "../assets/images/backgroundHS.jpg";
+
 
 export default function HomeScreen() {
   const [todayData, setTodayData] = useState<TodayData | null>(null);
@@ -137,7 +137,7 @@ export default function HomeScreen() {
 
   // ✅ Main Screen Return
   return (
-    <ImageBackground source={backgroundImage} style={styles.backgroundImage}>
+    <ImageBackground source={require("../assets/images/backgroundHS.jpg")} style={styles.backgroundImage}>
       <ScrollView
         contentContainerStyle={[
           styles.container,

@@ -1,4 +1,6 @@
 // app/utils/types.ts
+
+// Define individual types
 export type WeatherData = {
   weather: { main: string; description: string }[];
   main: { temp: number };
@@ -25,5 +27,5 @@ export type TodayData = {
   sadLampTime?: string;
 };
 
-// ✅ Exporting WeatherData as default
-export default WeatherData;
+
+export default {};

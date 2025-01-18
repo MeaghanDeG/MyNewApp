@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { getCurrentLocation } from "@/utils/location";
 import { fetchWeatherAndDaylight } from "@/utils/fetchWeatherAndDaylight";
 import { fetchSchedules } from "@/utils/storage";
+import  theme from "@/theme";
 
 const backgroundImage = require("@/assets/images/backgroundFDS.jpg");
 
@@ -26,11 +27,12 @@ export default function FiveDayForecastScreen() {
         }
 
         // ✅ Safely map the forecast days with optional chaining
-        const forecastDays = weatherData.list.map((entry: any) => ({
-            date: entry?.dt_txt?.split(" ")[0] ?? "N/A",
-            main: entry?.weather?.[0]?.main ?? "N/A",
-            temp: entry?.main?.temp ?? "N/A",
+        const forecastDays: { date: string; main: string; temp: string }[] = weatherData.list.map((entry: any) => ({
+          date: entry.dt_txt.split(" ")[0],
+          main: entry.weather[0].main,
+          temp: entry.main.temp,
         }));
+        
 
         // ✅ Defensive check for city sunrise/sunset data
         const sunrise = weatherData?.city?.sunrise
@@ -94,20 +96,55 @@ export default function FiveDayForecastScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 16, backgroundColor: "#f9f9f9" },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 16,
-    marginBottom: 16,
-    elevation: 3,
+  container: {
+    padding: theme.spacing.medium,
+    backgroundColor: theme.colors.background,
   },
-  dateText: { fontSize: 20, fontWeight: "bold" },
-  weatherText: { fontSize: 16, marginTop: 8 },
-  daylightText: { fontSize: 16, marginVertical: 8 },
-  scheduleHeader: { fontSize: 18, fontWeight: "bold", marginTop: 12 },
-  scheduleText: { fontSize: 16, marginTop: 4 },
-  noSchedulesText: { fontSize: 16, fontStyle: "italic", color: "gray" },
-  errorText: { color: "red", textAlign: "center", marginTop: 20 },
+  card: {
+    backgroundColor: theme.colors.cardBackground,
+    borderRadius: theme.borderRadius.medium,
+    padding: theme.spacing.medium,
+    marginBottom: theme.spacing.medium,
+    shadowColor: theme.colors.border,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+  },
+  dateText: {
+    fontSize: theme.fontSizes.large,
+    fontWeight: "bold",
+    color: theme.colors.text,
+  },
+  weatherText: {
+    fontSize: theme.fontSizes.medium,
+    marginTop: theme.spacing.small,
+    color: theme.colors.text,
+  },
+  daylightText: {
+    fontSize: theme.fontSizes.medium,
+    marginVertical: theme.spacing.small,
+    color: theme.colors.text,
+  },
+  scheduleHeader: {
+    fontSize: theme.fontSizes.medium,
+    fontWeight: "bold",
+    marginTop: theme.spacing.small,
+    color: theme.colors.text,
+  },
+  scheduleText: {
+    fontSize: theme.fontSizes.small,
+    marginTop: theme.spacing.small,
+    color: theme.colors.text,
+  },
+  noSchedulesText: {
+    fontSize: theme.fontSizes.small,
+    fontStyle: "italic",
+    color: theme.colors.fadedText,
+  },
+  errorText: {
+    fontSize: theme.fontSizes.medium,
+    color: theme.colors.error,
+    textAlign: "center",
+    marginTop: theme.spacing.large,
+  },
 });
-

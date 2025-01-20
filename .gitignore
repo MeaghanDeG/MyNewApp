@@ -33,9 +33,7 @@ babel.config.js
 # ✅ Environment Variables
 # Protects sensitive API keys and configs
 # =====================
-.env
-.env*.local
-*.env
+
 
 # =====================
 # ✅ Native Project Files (iOS and Android)

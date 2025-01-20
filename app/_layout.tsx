@@ -1,28 +1,15 @@
 import React, { useState, useEffect } from "react";
-import {
-  SafeAreaView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { SafeAreaView, StyleSheet, TouchableOpacity } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { Asset } from "expo-asset";
+import { Slot, useRouter } from "expo-router";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { useRouter } from "expo-router";
-import { Asset } from "expo-asset"; // Import Asset from Expo
 import CustomSplashScreen from "@/components/CustomSplashScreen";
 import theme from "@/theme";
+import * as SplashScreen from "expo-splash-screen";
 
-// Import Screens
-import HomeScreen from "@/screens/HomeScreen";
-import InfoTabScreen from "@/screens/InfoTabScreen";
-import FiveDayScreen from "@/screens/FiveDayScreen";
-import ScheduleScreen from "@/screens/ScheduleScreen";
+SplashScreen.preventAutoHideAsync();
 
-const Tab = createBottomTabNavigator();
-
-// Define Icon Names
-type IconNames = "home" | "info-circle" | "calendar" | "marker";
 
 export default function Layout() {
   const [isAppReady, setAppReady] = useState(false);
@@ -31,8 +18,11 @@ export default function Layout() {
   useEffect(() => {
     const loadResources = async () => {
       try {
-        // Preload assets, including splash-animated.gif
-        await Asset.loadAsync(require("@/assets/images/splash-animated.gif"));
+        // Preload assets, including static splash and animated GIF
+        await Asset.loadAsync([
+          require("@/assets/images/static-splash.jpg"),
+          require("@/assets/images/splash-animated.gif"),
+        ]);
 
         // Simulate additional resource loading if needed
         await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -46,6 +36,7 @@ export default function Layout() {
     loadResources();
   }, []);
 
+  // Show custom splash screen until resources are loaded
   if (!isAppReady) {
     return <CustomSplashScreen onFinish={() => setAppReady(true)} />;
   }
@@ -53,52 +44,13 @@ export default function Layout() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.safeArea}>
-        <Tab.Navigator
-          screenOptions={({ route }) => {
-            let iconName: IconNames = "home"; // Default icon
-
-            // Map route names to FontAwesome icons
-            switch (route.name) {
-              case "Home":
-                iconName = "home";
-                break;
-              case "Info":
-                iconName = "info-circle";
-                break;
-              case "FiveDay":
-                iconName = "marker"; 
-                break;
-              case "Schedule":
-                iconName = "calendar";
-                break;
-              default:
-                break;
-            }
-
-            return {
-              tabBarIcon: ({ color, size }) => (
-                <FontAwesome icon={iconName} size={size} color={color} />
-              ),
-              headerShown: false,
-              tabBarActiveTintColor: theme.colors.primaryText,
-              tabBarInactiveTintColor: theme.colors.secondaryText,
-              tabBarStyle: {
-                backgroundColor: theme.colors.background,
-                borderTopColor: theme.colors.border,
-              },
-            };
-          }}
-        >
-          <Tab.Screen name="Home" component={HomeScreen} />
-          <Tab.Screen name="Info" component={InfoTabScreen} />
-          <Tab.Screen name="FiveDay" component={FiveDayScreen} />
-          <Tab.Screen name="Schedule" component={ScheduleScreen} />
-        </Tab.Navigator>
+        {/* Render current route content */}
+        <Slot />
 
         {/* Floating Settings Icon */}
         <TouchableOpacity
           style={styles.floatingButton}
-          onPress={() => router.push("/screens/SettingsScreen")}
+          onPress={() => router.push("/settings")}
         >
           <FontAwesome name="cog" size={24} color={theme.colors.primaryText} />
         </TouchableOpacity>
@@ -115,7 +67,7 @@ const styles = StyleSheet.create({
   },
   floatingButton: {
     position: "absolute",
-    top: theme.spacing.large, // Adjust position to avoid overlapping tabs
+    top: theme.spacing.large,
     right: theme.spacing.large,
     backgroundColor: theme.colors.primary,
     borderRadius: theme.borderRadius.large,

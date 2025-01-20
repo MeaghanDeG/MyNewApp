@@ -7,7 +7,7 @@ export default {
     assetBundlePatterns: ["**/*"],
     newArchEnabled: true,
     orientation: "portrait",
-    icon: "./app/assets/images/icon.png",
+    
     splash: {
       image: "./app/assets/images/static-splash.jpg",
       resizeMode: "contain",

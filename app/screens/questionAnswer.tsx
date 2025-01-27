@@ -11,9 +11,9 @@ import {
 import { BlurView } from "expo-blur";
 import { useRouter } from "expo-router";
 import { InteractiveButton } from "../components/InteractiveButton";
-import  theme  from "@/theme";
+import theme from "@/theme";
 
-export function questionAnswer() {
+export function QuestionAnswer() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [popupMessage, setPopupMessage] = useState<string | null>(null);
@@ -76,7 +76,9 @@ export function questionAnswer() {
       condition: () => answers[0] === "Yes",
       onSelect: (response: string) => {
         setAnswers((prev) => ({ ...prev, [1]: response }));
-        setPopupMessage("Everyday use of your SAD lamp is thought to be the most beneficial");
+        setPopupMessage(
+          "Everyday use of your SAD lamp is thought to be the most beneficial"
+        );
         setCurrentQuestionIndex(2);
       },
     },
@@ -104,7 +106,8 @@ export function questionAnswer() {
     },
     {
       id: 5,
-      question: "Have you ever been diagnosed as bipolar or having manic episodes?",
+      question:
+        "Have you ever been diagnosed as bipolar or having manic episodes?",
       answers: ["Yes", "No"],
       onSelect: (response: string) => {
         setAnswers((prev) => ({ ...prev, [5]: response }));
@@ -140,12 +143,11 @@ export function questionAnswer() {
       },
     },
   ];
-  
-  
+
   const memoizedQuestions = useMemo(() => {
     return questions.filter((q) => !q.condition || q.condition());
   }, [answers]);
-  
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <FlatList
@@ -154,7 +156,7 @@ export function questionAnswer() {
         renderItem={({ item }) => {
           const isAnswered = answers[item.id] !== undefined;
           const isCurrent = item.id === currentQuestionIndex;
-  
+
           return (
             <View
               key={item.id}
@@ -166,7 +168,9 @@ export function questionAnswer() {
               {isAnswered && !isCurrent ? (
                 <BlurView intensity={50} style={styles.blur}>
                   <Text style={styles.fadedHeading}>{item.question}</Text>
-                  <Text style={styles.answerText}>Your Answer: {answers[item.id]}</Text>
+                  <Text style={styles.answerText}>
+                    Your Answer: {answers[item.id]}
+                  </Text>
                 </BlurView>
               ) : (
                 <>
@@ -187,8 +191,7 @@ export function questionAnswer() {
         }}
         contentContainerStyle={styles.scrollContainer}
       />
-    
-  
+
       {/* Intermediate Modal */}
       <Modal visible={showIntermediatePopup} transparent animationType="fade">
         <View style={styles.modalOverlay}>
@@ -205,22 +208,20 @@ export function questionAnswer() {
         </View>
       </Modal>
 
-      
       {/* Final Modal */}
-        <Modal visible={showFinalPopup} transparent animationType="fade">
-          <View style={styles.modalOverlay}>
-            <View style={styles.popupContainer}>
-              <Text style={styles.popupText}>{finalPopupMessage}</Text>
-              <InteractiveButton
-                title="OK"
-                onPress={() => {
-                  setShowFinalPopup(false); // Close the modal
-                }}
-              />
-            </View>
+      <Modal visible={showFinalPopup} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.popupContainer}>
+            <Text style={styles.popupText}>{finalPopupMessage}</Text>
+            <InteractiveButton
+              title="OK"
+              onPress={() => {
+                setShowFinalPopup(false); // Close the modal
+              }}
+            />
           </View>
-        </Modal>
-
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -298,4 +299,4 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
   },
 });
-export default questionAnswer;
+export default QuestionAnswer;

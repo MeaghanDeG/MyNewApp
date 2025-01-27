@@ -1,40 +1,35 @@
-// app/utils/fetchWeatherAndDaylight.ts
+import Constants from "expo-constants";
+
 export const fetchWeatherAndDaylight = async (
   latitude: number,
   longitude: number
 ) => {
   try {
-    // Retrieve the API key from environment variables
-    const apiKey = process.env.EXPO_PUBLIC_OPENWEATHERMAP_API_KEY;
-
+    const apiKey = Constants.expoConfig?.extra?.OPENWEATHERMAP_API_KEY;
     if (!apiKey) {
       throw new Error("Missing OpenWeatherMap API key.");
     }
 
-    // Construct the API URL
-    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}`;
+    // Fetch current weather for sunrise/sunset
+    const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}`;
+    console.log("Fetching current weather data from URL:", currentWeatherUrl);
 
-    // Fetch the weather data
-    const response = await fetch(url);
-
-    // Check if the response is OK
-    if (!response.ok) {
-      throw new Error(`HTTP Error! Status: ${response.status}`);
+    const currentWeatherResponse = await fetch(currentWeatherUrl);
+    if (!currentWeatherResponse.ok) {
+      throw new Error(`HTTP Error! Status: ${currentWeatherResponse.status}`);
     }
 
-    const data = await response.json();
+    const currentWeatherData = await currentWeatherResponse.json();
+    console.log("Current Weather Data:", currentWeatherData);
 
-    // Defensive check for sys.sunrise and sys.sunset
-    if (!data.sys || typeof data.sys.sunrise !== "number" || typeof data.sys.sunset !== "number") {
+    if (!currentWeatherData.sys?.sunrise || !currentWeatherData.sys?.sunset) {
       throw new Error("Sunrise/sunset data is missing from the API response.");
     }
 
-    // Return the weather data
-    return data;
+    // Return weather and daylight data
+    return currentWeatherData;
   } catch (error) {
-    console.error("Error fetching weather data:", error.message || error);
+    console.error("Error fetching weather and daylight data:", error);
     throw error;
   }
 };
-
-export default fetchWeatherAndDaylight;

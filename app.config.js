@@ -1,28 +1,29 @@
+import "dotenv/config";
+
 export default {
   expo: {
-    scheme: "mynewapp", 
+    scheme: "mynewapp",
     name: "MyNewApp",
     slug: "mynewapp",
     version: "1.0.0",
     assetBundlePatterns: ["**/*"],
     newArchEnabled: true,
     orientation: "portrait",
-    
+    icon: "./app/assets/images/icon.png",
     splash: {
       image: "./app/assets/images/static-splash.jpg",
-      resizeMode: "contain",
-      backgroundColor: "#ffffff"
+      resizeMode: "cover",
+      backgroundColor: "#ffffff",
     },
-    assets: [
-      "./app/assets/fonts/SpaceMono-Regular.ttf" 
-    ],
+    assets: ["./app/assets/fonts/SpaceMono-Regular.ttf"],
     plugins: ["expo-router"],
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "com.meaghandegroot.mynewapp"
+      bundleIdentifier: "com.meaghandegroot.mynewapp",
     },
     extra: {
-      OPENWEATHERMAP_API_KEY: process.env.OPENWEATHERMAP_API_KEY
-    }
-  }
+      OPENWEATHERMAP_API_KEY: "0f01e6ac2625fdfa2f971fe70b725c67"
+    },
+  },
 };
+

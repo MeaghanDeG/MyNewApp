@@ -3,16 +3,16 @@ module.exports = function (api) {
   return {
     presets: ["babel-preset-expo"],
     plugins: [
+      "react-native-reanimated/plugin", // Reanimated plugin must be standalone
       [
         "module-resolver",
         {
           alias: {
-            "@": "./app"
+            "@": "./app", // Define the alias for your app folder
           },
-          extensions: [".js", ".jsx", ".ts", ".tsx", ".json"]
-        }
+          extensions: [".js", ".jsx", ".ts", ".tsx", ".json"], // Optional extensions for resolving files
+        },
       ],
-      ["module:react-native-dotenv", { moduleName: "@env", path: ".env" }]
-    ]
+    ],
   };
 };

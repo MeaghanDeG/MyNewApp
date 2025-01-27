@@ -20,8 +20,8 @@
     "app/**/*.tsx",
     "app/utils/types.ts",
     "index.ts",
-    "index.tsx"
-  ],
+    "app/index.tsx"
+, "app/_layout.tsx"  ],
   "exclude": [
     "node_modules",
     "babel.config.js",

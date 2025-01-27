@@ -1,81 +1,116 @@
 import React, { useState, useEffect } from "react";
-import { SafeAreaView, StyleSheet, TouchableOpacity } from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import { Asset } from "expo-asset";
-import { Slot, useRouter } from "expo-router";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { useFonts } from "expo-font";
+import * as SplashScreen from "expo-splash-screen"; // To control the static splash screen
+import { StatusBar } from "react-native";
+import { createStackNavigator } from "@react-navigation/stack";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import HomeScreen from "@/screens/HomeScreen";
+import FiveDayScreen from "@/screens/FiveDayScreen";
+import CollectedDataScreen from "@/screens/CollectedDataScreen";
+import SettingsScreen from "@/screens/SettingsScreen";
+import ScheduleScreen from "@/screens/ScheduleScreen";
+import InfoTabScreen from "@/screens/InfoTabScreen";
 import CustomSplashScreen from "@/components/CustomSplashScreen";
-import theme from "@/theme";
-import * as SplashScreen from "expo-splash-screen";
+import { Ionicons } from "@expo/vector-icons";
 
-SplashScreen.preventAutoHideAsync();
+// Navigation setup
+const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
 
+// ✅ Tabs (Bottom Navigation)
+const Tabs = () => (
+  <Tab.Navigator
+    screenOptions={({ route }) => ({
+      tabBarIcon: ({ color, size }) => {
+        let iconName: keyof typeof Ionicons.glyphMap;
 
-export default function Layout() {
-  const [isAppReady, setAppReady] = useState(false);
-  const router = useRouter();
+        switch (route.name) {
+          case "Home":
+            iconName = "home-outline";
+            break;
+          case "Forecast":
+            iconName = "cloud-outline";
+            break;
+          case "Schedule":
+            iconName = "calendar-outline";
+            break;
+          case "Info":
+            iconName = "information-circle-outline";
+            break;
+          case "Settings":
+            iconName = "settings-outline";
+            break;
+          default:
+            iconName = "help-outline";
+        }
+
+        return <Ionicons name={iconName} size={size} color={color} />;
+      },
+      tabBarActiveTintColor: "#006a55",
+      tabBarInactiveTintColor: "#002740",
+    })}
+  >
+    <Tab.Screen name="Home" component={HomeScreen} />
+    <Tab.Screen name="Forecast" component={FiveDayScreen} />
+    <Tab.Screen name="Schedule" component={ScheduleScreen} />
+    <Tab.Screen name="Info Section" component={InfoTabScreen} />
+    <Tab.Screen name="Settings" component={SettingsScreen} />
+  </Tab.Navigator>
+);
+
+// ✅ Main Navigation Stack
+const MainStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: true }}>
+    <Stack.Screen
+      name="MainTabs"
+      component={Tabs}
+      options={{ headerShown: false }} // Hide headers for tabs
+    />
+    <Stack.Screen name="CollectedDataScreen" component={CollectedDataScreen} />
+  </Stack.Navigator>
+);
+
+// ✅ App Layout with Splash Screen and Font Loading
+const AppLayout = () => {
+  const [isSplashComplete, setSplashComplete] = useState(false);
+
+  // Load custom fonts
+  const [fontsLoaded] = useFonts({
+    "SpaceMono-Regular": require("./assets/fonts/SpaceMono-Regular.ttf"),
+  });
 
   useEffect(() => {
-    const loadResources = async () => {
+    // Prevent static splash screen from hiding until fonts are ready
+    const prepareSplashScreen = async () => {
       try {
-        // Preload assets, including static splash and animated GIF
-        await Asset.loadAsync([
-          require("@/assets/images/static-splash.jpg"),
-          require("@/assets/images/splash-animated.gif"),
-        ]);
-
-        // Simulate additional resource loading if needed
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-
-        setAppReady(true);
+        await SplashScreen.preventAutoHideAsync();
       } catch (e) {
-        console.error("Error loading resources:", e);
+        console.warn(e);
       }
     };
 
-    loadResources();
+    prepareSplashScreen();
   }, []);
 
-  // Show custom splash screen until resources are loaded
-  if (!isAppReady) {
-    return <CustomSplashScreen onFinish={() => setAppReady(true)} />;
+  useEffect(() => {
+    // Hide splash screen once everything is ready
+    if (fontsLoaded && isSplashComplete) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, isSplashComplete]);
+
+  // Show the custom splash screen while preparing the app
+  if (!fontsLoaded || !isSplashComplete) {
+    return <CustomSplashScreen onFinish={() => setSplashComplete(true)} />;
   }
 
+  // Return the main navigation once ready
   return (
-    <SafeAreaProvider>
-      <SafeAreaView style={styles.safeArea}>
-        {/* Render current route content */}
-        <Slot />
-
-        {/* Floating Settings Icon */}
-        <TouchableOpacity
-          style={styles.floatingButton}
-          onPress={() => router.push("/settings")}
-        >
-          <FontAwesome name="cog" size={24} color={theme.colors.primaryText} />
-        </TouchableOpacity>
-      </SafeAreaView>
-    </SafeAreaProvider>
+    <>
+      <StatusBar barStyle="dark-content" backgroundColor="#f8f8f8" />
+      <MainStack /> {/* Main Navigation */}
+    </>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-    paddingTop: theme.spacing.large,
-  },
-  floatingButton: {
-    position: "absolute",
-    top: theme.spacing.large,
-    right: theme.spacing.large,
-    backgroundColor: theme.colors.primary,
-    borderRadius: theme.borderRadius.large,
-    padding: theme.spacing.medium,
-    shadowColor: theme.colors.border,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-});
+export default AppLayout;

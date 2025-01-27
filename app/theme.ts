@@ -9,7 +9,7 @@ const theme = {
     text: "#333333", // Default text color
     fadedText: "#464646", // Faded text
     border: "#212761", // Borders and dividers
-    error: "#63f9ff", // Error or alert messages
+    error: "#63f9cc", // Error or alert messages
     success: "#F1F48D", // Success messages
   },
   spacing: {

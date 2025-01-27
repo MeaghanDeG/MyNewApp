@@ -181,10 +181,11 @@ export default function ScheduleScreen() {
       {modalVisible && (
         <BlurView intensity={50} style={StyleSheet.absoluteFill}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Add Schedule for {selectedDate}</Text>
+            <Text style={styles.modalTitle}>ADD SCHEDULE FOR {selectedDate}</Text>
             <TextInput
               style={styles.input}
-              placeholder="Enter schedule description"
+              placeholder="Schedule description (required)"
+              placeholderTextColor="#aaa"
               value={scheduleInput}
               onChangeText={setScheduleInput}
             />
@@ -236,30 +237,128 @@ export default function ScheduleScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, padding: 20 },
-  daylightBox: { backgroundColor: "#E3F2FD", padding: 16, borderRadius: 8 },
-  daylightTitle: { fontSize: 18, fontWeight: "bold" },
-  daylightText: { fontSize: 16 },
-  card: { padding: 10, backgroundColor: "#f0f0f0", marginVertical: 8 },
-  clearButton: { backgroundColor: "#ff4444", padding: 12, borderRadius: 8 },
-  clearButtonText: { color: "white", textAlign: "center" },
+  // Safe Area
+  safeArea: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+    padding: theme.spacing.medium,
+  },
+
+  // Daylight Box
+  daylightBox: {
+    backgroundColor: theme.colors.primary,
+    padding: theme.spacing.medium,
+    borderRadius: theme.borderRadius.medium,
+    marginBottom: theme.spacing.medium,
+    elevation: 3, // Subtle shadow for depth
+  },
+  daylightTitle: {
+    fontSize: theme.fontSizes.large,
+    fontWeight: "bold",
+    color: theme.colors.primaryText,
+    marginBottom: theme.spacing.small,
+  },
+  daylightText: {
+    fontSize: theme.fontSizes.medium,
+    color: theme.colors.primaryText,
+  },
+
+  // Schedule Cards
+  scheduleContainer: {
+    flexGrow: 1,
+    paddingVertical: theme.spacing.medium,
+  },
+  card: {
+    backgroundColor: theme.colors.cardBackground,
+    borderRadius: theme.borderRadius.medium,
+    padding: theme.spacing.medium,
+    marginBottom: theme.spacing.small,
+    elevation: 2,
+    shadowColor: theme.colors.border,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  scheduleText: {
+    fontSize: theme.fontSizes.medium,
+    color: theme.colors.text,
+  },
+  noSchedulesText: {
+    fontSize: theme.fontSizes.medium,
+    fontStyle: "italic",
+    color: theme.colors.fadedText,
+    textAlign: "center",
+    marginTop: theme.spacing.large,
+  },
+
+  // Buttons
+  clearButton: {
+    backgroundColor: theme.colors.error,
+    padding: theme.spacing.medium,
+    borderRadius: theme.borderRadius.medium,
+    marginTop: theme.spacing.medium,
+  },
+  clearButtonText: {
+    color: theme.colors.primaryText,
+    fontSize: theme.fontSizes.medium,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  saveButton: {
+    backgroundColor: "#66d4ff",
+    padding: theme.spacing.medium,
+    borderRadius: theme.borderRadius.medium,
+    marginTop: theme.spacing.medium,
+  },
+  saveButtonText: {
+    color: "#FFF",
+    fontSize: theme.fontSizes.medium,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
   cancelButton: {
-    backgroundColor: "#888",
-    padding: 10,
-    marginTop: 10,
-    borderRadius: 8,
+    backgroundColor: "#cd9b0a",
+    padding: theme.spacing.medium,
+    borderRadius: theme.borderRadius.medium,
+    marginTop: theme.spacing.small,
   },
   cancelButtonText: {
-    color: "white",
-    textAlign: "center",
+    color: "#FFF",
+    fontSize: theme.fontSizes.medium,
     fontWeight: "bold",
+    textAlign: "center",
   },
-  saveButton: { backgroundColor: "#4CAF50", padding: 12, borderRadius: 8 },
-  saveButtonText: { color: "#FFF", textAlign: "center" },
-  scheduleContainer: { paddingVertical: 16 },
-  noSchedulesText: { textAlign: "center", marginTop: 20 },
-  modalContent: { padding: 20, backgroundColor: "white", borderRadius: 8 },
-  modalTitle: { fontSize: 20, fontWeight: "bold", textAlign: "center", marginBottom: 16 },
-  input: { borderBottomWidth: 1, padding: 10, marginBottom: 12 },
-});
 
+  // Modal
+  modalContent: {
+    backgroundColor: "rgba(255,255,255,0.9)",
+    borderRadius: theme.borderRadius.large,
+    padding: theme.spacing.large,
+    marginHorizontal: theme.spacing.medium,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: theme.fontSizes.large,
+    fontWeight: "bold",
+    color: theme.colors.text,
+    textAlign: "center",
+    marginBottom: theme.spacing.large,
+  },
+  input: {
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+    padding: theme.spacing.small,
+    fontSize: theme.fontSizes.medium,
+    marginBottom: theme.spacing.medium,
+  },
+  
+
+  // Calendar Styling
+  calendar: {
+    marginBottom: theme.spacing.medium,
+  },
+});

@@ -21,11 +21,26 @@ export type DaylightData = {
 
 export type TodayData = {
   date: string;
-  schedule: ScheduleItem[];
-  weather?: WeatherData;
-  daylight?: DaylightData;
-  sadLampTime?: string;
+  schedule: Array<{
+    id: string;
+    startTime: string;
+    endTime: string;
+    description: string;
+  }>;
+  weather: {
+    weather: Array<{
+      main: string; // e.g., "Clouds", "Rain"
+      description: string; // e.g., "overcast clouds"
+    }>;
+    main: {
+      temp: number; // e.g., 25.5 (temperature)
+    };
+  };
+  daylight: {
+    sunrise: string; // e.g., "06:30 AM"
+    sunset: string; // e.g., "07:45 PM"
+  };
+  sadLampTime: string; // e.g., "No available time today"
 };
-
 
 export default {};

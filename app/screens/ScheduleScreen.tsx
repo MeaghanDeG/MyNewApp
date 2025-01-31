@@ -65,8 +65,7 @@ export default function ScheduleScreen() {
     const startTime = selectedStartTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     const endTime = selectedEndTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     if (startTime >= endTime) {
-      Alert.alert("Error", "Start time must be before end time.");
-      return;
+      
     }
 
     const newSchedule = {

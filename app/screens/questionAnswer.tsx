@@ -153,6 +153,7 @@ export function QuestionAnswer() {
       <FlatList
         data={memoizedQuestions} // Use memoizedQuestions here
         keyExtractor={(item) => item.id.toString()}
+        nestedScrollEnabled
         renderItem={({ item }) => {
           const isAnswered = answers[item.id] !== undefined;
           const isCurrent = item.id === currentQuestionIndex;
@@ -169,7 +170,7 @@ export function QuestionAnswer() {
                 <BlurView intensity={50} style={styles.blur}>
                   <Text style={styles.fadedHeading}>{item.question}</Text>
                   <Text style={styles.answerText}>
-                    Your Answer: {answers[item.id]}
+                     {answers[item.id]}
                   </Text>
                 </BlurView>
               ) : (
@@ -217,6 +218,7 @@ export function QuestionAnswer() {
               title="OK"
               onPress={() => {
                 setShowFinalPopup(false); // Close the modal
+                router.push("/info"); // Navigate to info.tsx
               }}
             />
           </View>
@@ -251,9 +253,10 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
   answerText: {
+    opacity: 0.6,
     fontSize: theme.fontSizes.medium,
     color: theme.colors.secondaryText,
-    marginTop: 8,
+    marginTop: 1,
   },
   blur: {
     ...StyleSheet.absoluteFillObject,

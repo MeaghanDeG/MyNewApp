@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
 import { FontAwesome5 } from "@expo/vector-icons"; // Add this import at the top
 
 import { View, Text, StyleSheet, ScrollView, Image, ImageBackground,TouchableOpacity } from "react-native";
@@ -11,6 +12,7 @@ import theme from "@/theme";
 const HomeScreen = () => {
   const [todayData, setTodayData] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const loadTodayData = async () => {
     try {
@@ -143,14 +145,14 @@ const HomeScreen = () => {
         </View>
 
         {/* Button to navigate to CollectedDataScreen */}
-        <TouchableOpacity
-          style={styles.navigationButton}
-          onPress={() => navigation.navigate("CollectedDataScreen")} // Navigate to CollectedDataScreen
-        >
-          <Text style={styles.navigationButtonText}>Go to Collected Data</Text>
-        </TouchableOpacity>
-
-
+        return (
+    <TouchableOpacity
+      style={styles.navigationButton}
+      onPress={() => router.push("/CollectedDataScreen")} // ✅ Correct navigation call
+    >
+      <Text style={styles.navigationButtonText}>Go to Collected Data</Text>
+    </TouchableOpacity>
+  );
       </ScrollView>
     </ImageBackground>
   );
